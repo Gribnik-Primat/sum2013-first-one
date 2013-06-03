@@ -81,14 +81,20 @@ HPEN hPen, hOldPen;
 HBRUSH hBr, hOldBr;
 VOID drawdigit(INT x,INT y,INT num)
 {
-
-
+  int n1 = 0,n2 = 0;
+  if (num >= 10)
+  {
+    n1 = num/10;
+    n2 = num%10;
+  }
+  else
+    n2 = num;
 
  
 
   hDC = GetDC(hWnd);
 
-  switch (num)
+  switch (n1)
   {
     case 0:
       SelectObject(hDC, GetStockObject(DC_PEN));
@@ -281,10 +287,204 @@ VOID drawdigit(INT x,INT y,INT num)
       LineTo(hDC, x + 18, y -16 );
       break;
   }
- 
+  x += 35;
+  switch (n2)
+  {
+    case 0:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 3, NULL);
+      LineTo(hDC, x, y - 15);
+      
+      MoveToEx(hDC, x, y - 18, NULL);
+      LineTo(hDC, x, y - 33 );
+      
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+      break;
+
+    case 1:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x , y - 30 , NULL);
+      LineTo(hDC, x , y - 18);
+       
+      MoveToEx(hDC, x, y - 15, NULL);
+      LineTo(hDC,  x, y);
+      
+  
+      break;
+
+    case 5:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      
+      
+      MoveToEx(hDC, x, y - 18, NULL);
+      LineTo(hDC, x, y - 33 );
+      
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+
+    case 3:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+    case 4:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 15, NULL);
+      LineTo(hDC, x, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;    
+    case 2:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 3, NULL);
+      LineTo(hDC, x, y - 15);
+      
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+    case 6:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 3, NULL);
+      LineTo(hDC, x, y - 15);
+      
+      MoveToEx(hDC, x, y - 18, NULL);
+      LineTo(hDC, x, y - 33 );
+      
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y  , NULL);
+      LineTo(hDC, x + 18, y -18  );
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+
+      case 7:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x , y - 33 , NULL);
+      LineTo(hDC, x+15 , y - 33);
+
+
+   
+      break;
+    case 8:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 3, NULL);
+      LineTo(hDC, x, y - 15);
+      
+      MoveToEx(hDC, x, y - 18, NULL);
+      LineTo(hDC, x, y - 33 );
+      
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+      case 9:
+      SelectObject(hDC, GetStockObject(DC_PEN));
+      SetDCPenColor(hDC, RGB(0, 140, 0));
+      MoveToEx(hDC, x, y - 15, NULL);
+      LineTo(hDC, x, y -33);
+      
+    
+      MoveToEx(hDC, x + 3, y - 33, NULL);
+      LineTo(hDC,  x + 18, y - 33);
+      
+      MoveToEx(hDC, x + 18, y - 30 , NULL);
+      LineTo(hDC, x + 18, y - 18);
+       
+      MoveToEx(hDC, x + 18, y - 15, NULL);
+      LineTo(hDC,  x + 18, y);
+      
+      MoveToEx(hDC, x + 15, y , NULL);
+      LineTo(hDC, x, y);
+
+      MoveToEx(hDC, x , y -16 , NULL);
+      LineTo(hDC, x + 18, y -16 );
+      break;
+  }
+  
 
   ReleaseDC(hWnd, hDC);
-}
+}    
 
 
 
@@ -345,6 +545,7 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
     Ellipse(hDC, 300, 300, 600, 600);
     
      
+
     angle1 = 2*3.14 / 12 * st.wHour;
     angle2 = 2*3.14 / 60 * st.wMinute;
     angle3 = 2*3.14 / 60 * st.wSecond;
@@ -361,12 +562,16 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
     LineTo(hDC,  125*sin(angle3)+450, 450 - cos(angle3)*150);
 
 
-    TextOut(hDC,50, 700,Buf,sprintf(Buf,"%02i : %02i : %02i",st.wHour,st.wMinute,st.wSecond));
+    TextOut(hDC,700, 700,Buf,sprintf(Buf,"%02i : %02i : %02i",st.wHour,st.wMinute,st.wSecond));
 
 
-    /*for(i = 0; i< 10;i++)
-      drawdigit(320 + i*35,320,d[i]); */
+
+    drawdigit(270,700,st.wHour);
  
+    drawdigit(360,700,st.wMinute);
+ 
+    drawdigit(470,700,st.wSecond);
+     
 
     ReleaseDC(hWnd, hDC);
  
