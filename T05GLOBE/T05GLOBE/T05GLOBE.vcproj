@@ -96,7 +96,7 @@
 			OutputDirectory="E:\$(UserName)\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="E:\$(UserName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>

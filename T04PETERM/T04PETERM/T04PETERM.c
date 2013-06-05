@@ -63,12 +63,33 @@ void Go(int pos)
 }
 
 
+
+
+void gauss()
+{
+  int i, j, k;
+  for (j = 0; j < N; j++)
+  {
+    k = 0;
+    while (A[k][0] == 0)
+      k++;
+    for (i = 0; i < N; i++)
+      swap(&A[i][k], &A[i][0]);
+    for (j = 1; j < N; j++)
+      for (i = 1; i < N; i++)
+        A[i][j] -= A[i][0] * (A[i][0] / A[0][0]);
+  }
+  for (i = 0; i < N; i++)
+    Determ *= A[i][i];
+}  
+
 void main (void)
 {
   int i;
   Load ("matrix.txt");
   for(i = 0;i < N;i++)
     P[i]=i+1;
-  Go(0);
+  gauss();
+  //Go(0);
   printf("determ is: %lf",Determ);
 }

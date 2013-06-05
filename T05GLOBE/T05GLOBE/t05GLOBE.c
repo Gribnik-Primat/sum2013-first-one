@@ -63,7 +63,8 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   hWnd = CreateWindowA(WND_CLASS_NAME, "> 30 <",
     WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN,
-    10, 10, 1024, 1024, NULL, NULL, hInstance, NULL);
+    10, 10, 750, 750, NULL, NULL, hInstance, NULL);
+
 
   while (GetMessage(&msg, NULL, 0, 0))
     DispatchMessage(&msg);
@@ -92,7 +93,7 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
                                WPARAM wParam, LPARAM lParam )
 {
   
-  INT x, y,i,j,w=0,h=0;
+  INT x,y,z,i,j,w=0,h=0;
   double theta,phi,phaseshift=0;
   HDC hDC;
   HPEN hPen, hOldPen;
@@ -101,29 +102,23 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
   PAINTSTRUCT ps;
   POINT pt;
   BITMAP Bm;
-  FILE *F;
-  BYTE *mem,r,g,b;
+  BYTE r,g,b;
   static INT WinW, WinH;
   static HDC hMemDCFrame, hMemDC;
   static HBITMAP hBmFrame, hBmBack, hBmAnd, hBmXor;
-
-  /*F=fopen("GLOBE.G24","rb");
-  fread(&w,2,1,F);
-  fread(&h,2,1,F);
-  mem = malloc(w*h*3);
-  fread(mem,3,w*h,F);
-  fclose(F);  */
-                     
-  
   SYSTEMTIME st;
+  COLORREF c; 
 
+
+  
   switch (Msg)
   {
   case WM_CREATE:
     cs = (CREATESTRUCT *)lParam;
     SetTimer(hWnd, 30, 5, NULL);
                                                                       
-                          
+    hBmBack = LoadImage(NULL, "globe.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
 
     /*** создаем контекст в памяти ***/
     /* определяем контект окна */
@@ -161,30 +156,44 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 
     GetLocalTime(&st);
 
-    SelectObject(hMemDCFrame, GetStockObject(DC_BRUSH));
-    SelectObject(hMemDCFrame, GetStockObject(NULL_PEN));
+    SelectObject(hMemDC, GetStockObject(DC_BRUSH));
+    SelectObject(hMemDC, GetStockObject(NULL_PEN));
 
-    SetDCBrushColor(hMemDCFrame, RGB(0, 0, 0));
-    Rectangle(hMemDCFrame, 0, 0, WinW + 1, WinH + 1);
-    SelectObject(hMemDCFrame, GetStockObject(DC_PEN));
-    SetDCPenColor(hMemDCFrame, RGB(255, 250, 250));
+    SetDCBrushColor(hMemDC, RGB(50, 150, 200));
+    Rectangle(hMemDC, 0, 0, WinW + 1, WinH + 1);
+    SelectObject(hMemDC, GetStockObject(DC_PEN));
+    SetDCPenColor(hMemDC, RGB(255, 250, 250));
 
+    
+    
     for(i = 0; i <= WinW;i++)
       for(j = 0;j < WinH;j++)
       {    
         theta = i*3.14/WinW;
-        phi = j*2*3.14/WinH; 
+        phi = j*2*3.14/WinH+phaseshift; 
       
-        x = (INT) 500*sin(theta)*cos(phi);
-        y = (INT) 500*cos(theta);
-
-        if(x>0) 
-        {         
-          SetPixel(hMemDCFrame,x+512,y+512,RGB(255,255,255));
+        x = (INT) 350*sin(theta)*cos(phi)+WinW/2;
+        y = (INT) 350*sin(theta)*sin(phi)+WinW/2;
+        z = (INT) 350*cos(theta);
+        
+        
+        
+        if(z>0) 
+        {      
+          SelectObject(hMemDC,hBmBack);
+          c = GetPixel(hMemDC,x,y);
+          
+          r = GetRValue(c);
+          g = GetGValue(c);
+          b = GetBValue(c);
+          
+          SetPixel(hMemDCFrame,x,y,RGB(r,g,b));
         }
+        phaseshift += 1*st.wSecond;
       }
 
   
+
    
     /* засыл перерисовки */
     InvalidateRect(hWnd, NULL, FALSE);
