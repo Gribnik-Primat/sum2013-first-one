@@ -59,16 +59,16 @@ __inline VEC VecSubVec( VEC V1, VEC V2 )
 }
 __inline VEC VecMulNum( VEC V1, DBL N )
 {
-  V1.X = abs(V1.X) * N;
-  V1.Y = abs(V1.Y) * N;
-  V1.Z = abs(V1.Z) * N;
+  V1.X = V1.X * N;
+  V1.Y = V1.Y * N;
+  V1.Z = V1.Z * N;
   return V1;
 }
 __inline VEC VecDivNum( VEC V1, DBL N )
 {
-  V1.X = abs(V1.X) / N;
-  V1.Y = abs(V1.Y) / N;
-  V1.Z = abs(V1.Z) / N;
+  V1.X = V1.X / N;
+  V1.Y = V1.Y / N;
+  V1.Z = V1.Z / N;
   return V1;
 }
 __inline VEC VecNeg( VEC V )  // поменять знак
@@ -214,6 +214,8 @@ __inline MATR MatrRotate( DBL AngleeDegree, DBL X, DBL Y, DBL Z )
   m.A[3][1] = 0;
   m.A[3][2] = 0;
   m.A[3][3] = 1;
+
+  return m;
 }
 
 __inline MATR MatrMulMatr( MATR M1, MATR M2 )

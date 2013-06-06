@@ -158,30 +158,38 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
                                WPARAM wParam, LPARAM lParam )
 {
   
-  INT x,y,z,i,j,w=0,h=0;
-  DOUBLE scale = 1,tim;
-  double theta,phi,phaseshift=0;
+  DOUBLE x,y,w=0,h=0, scale = 1,tim,a;
+  INT i,j;
+  double phaseshift=0;
   HDC hDC;
-  HPEN hPen, hOldPen;
-  HBRUSH hBr, hOldBr;
+  
   CREATESTRUCT *cs;
   PAINTSTRUCT ps;
-  POINT p[3];
-  BITMAP Bm;
-  BYTE r,g,b;
+
+ 
   static INT WinW, WinH;
   static HDC hMemDCFrame, hMemDC;
   static HBITMAP hBmFrame, hBmBack, hBmAnd, hBmXor;
   SYSTEMTIME st;
-  COLORREF c;
+
+  MATR M1,M2,M3;
 
   LoadCow();
+  
+  scale = 59;
+  
+  tim = clock();
+  a = tim * 0.030;
+  M1 = MatrRotate(a,0 , 1, 1);
+  M2 = MatrScale(scale,-scale,scale);
+  M3 = MatrTranslate(WinW/2,WinW/2,WinW/2);
+
 
   switch (Msg)
   {
   case WM_CREATE:
     cs = (CREATESTRUCT *)lParam;
-    SetTimer(hWnd, 30, 5, NULL);
+    SetTimer(hWnd, 30, 1, NULL);
                                                                       
     
 
@@ -231,20 +239,27 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 
     
     
-    tim = clock();
+ 
     SelectObject(hMemDCFrame, GetStockObject(NULL_BRUSH));
     SelectObject(hMemDCFrame, GetStockObject(DC_PEN));
     SetDCPenColor(hMemDCFrame, RGB(255, 255, 255));
     SetDCBrushColor(hMemDCFrame, RGB(0, 111, 0));
-    scale = 59;
+
+
+
+    
     /* calculate projection */
     for (i = 0; i < NumOfVertexes; i++)
     {
-      DOUBLE a = tim * 0.00030;
-      VertexesProj[i].X = WinW / 2 + scale * (Vertexes[i].X * cos(a) - Vertexes[i].Z * sin(a));
-      VertexesProj[i].Y = WinH / 2 - scale * (Vertexes[i].Y);
-      VertexesProj[i].Z = scale * (Vertexes[i].X * sin(a) + Vertexes[i].Z * cos(a));
+
+      Vertexes[i] = VecMulMatr(Vertexes[i],M1);
+      Vertexes[i] = VecMulMatr(Vertexes[i],M2);
+      Vertexes[i] = VecMulMatr(Vertexes[i],M3);
+  
     }
+
+
+   
 
     for (i = 0; i < NumOfFacets; i++)
     {
@@ -252,8 +267,8 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 
       for (j = 0; j < 3; j++)
       {
-        p[j].x = VertexesProj[Facets[i][j]].X;
-        p[j].y = VertexesProj[Facets[i][j]].Y;
+        p[j].x = Vertexes[Facets[i][j]].X;
+        p[j].y = Vertexes[Facets[i][j]].Y;
       }
 
       Polygon(hMemDCFrame, p, 3);
@@ -262,9 +277,9 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
     for (i = 0; i < NumOfVertexes; i++)
     {
       
-        x = VertexesProj[i].X;
-        y = VertexesProj[i].Y;
-      SetPixelV(hMemDCFrame, x, y, RGB(255, 255, 255));
+        x = Vertexes[i].X;
+        y = Vertexes[i].Y;
+        SetPixelV(hMemDCFrame, x, y, RGB(255, 255, 255));
     }
 
     
