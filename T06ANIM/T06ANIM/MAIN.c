@@ -1,21 +1,26 @@
-/* FILE NAME: T03DBLBF.C
+/* FILE NAME: MAIN.C
  * PROGRAMMER: VG4
- * DATE: 03.06.2013
- * PURPOSE: WinAPI double buffered output.
+ * DATE: 06.06.2013
+ * PURPOSE: Main math support implementation module.
  */
-#include "VEC.h"
-
-#include <windows.h>
 
 #include <time.h>
+#include <stdlib.h>
 
-#include <math.h>
+#include "anim.h"
+#include "units.h"
 
-#include <stdio.h>
-
+/* Глобальные определения */
 #define WND_CLASS_NAME "My window class"
+#define ANIMATION_TIMER 30
 
-/* Ссылки вперед */
+
+
+
+
+
+
+/* Функция обработки сообщения окна */
 LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
                                WPARAM wParam, LPARAM lParam );
 
@@ -36,41 +41,66 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     CHAR *CmdLine, INT ShowCmd )
 {
-  WNDCLASS wc;
+  INT i;
+  WNDCLASSEX wc;
   MSG msg;
   HWND hWnd;
 
-  
-  
+
+
+  VG4_AnimAdd(CowCreate(750,450));
+ 
+
+  wc.cbSize = sizeof(WNDCLASSEX); /* Размер структуры для совместимости */
   wc.style = CS_VREDRAW | CS_HREDRAW; /* Стиль окна: полностью перерисовывать
                                        * при изменении вертикального или
-                                       * горизонтального размеров */
+                                       * горизонтального размеров (еще CS_DBLCLKS) */
   wc.cbClsExtra = 0; /* Дополнительное количество байт для класса */
   wc.cbWndExtra = 0; /* Дополнительное количество байт для окна */
   wc.hbrBackground = (HBRUSH)COLOR_WINDOW; /* Фоновый цвет - выбранный в системе */
   wc.hCursor = LoadCursor(NULL, IDC_ARROW); /* Загрузка курсора (системного) */
   wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); /* Загрузка пиктограммы (системной) */
+  wc.hIconSm = LoadIcon(NULL, IDI_EXCLAMATION); /* Загрузка малой пиктограммы (системной) */
   wc.lpszMenuName = NULL; /* Имя ресурса меню */
   wc.hInstance = hInstance; /* Дескриптор приложения, регистрирующего класс */
   wc.lpfnWndProc = MyWindowFunc; /* Указатель на функцию обработки */
   wc.lpszClassName = WND_CLASS_NAME; /* Имя класса */
 
   /* Регистрация класса в системе */
-  if (!RegisterClass(&wc))
+  if (!RegisterClassEx(&wc))
   {
     MessageBox(NULL, "Error register window class", "ERROR", MB_OK);
     return 0;
   }
 
   hWnd = CreateWindowA(WND_CLASS_NAME, "> 30 <",
-    WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN,
-    10, 10, 750, 750, NULL, NULL, hInstance, NULL);
+    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+    NULL, NULL, hInstance, NULL);
 
+  ShowWindow(hWnd, ShowCmd);
+  UpdateWindow(hWnd);
 
-  while (GetMessage(&msg, NULL, 0, 0))
-    DispatchMessage(&msg);
+  while (TRUE)
+  {
+    /* смотрим, есть ли сообщение и вытаскиваем очередное */
+    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+      /* выход по WM_QUIT */
+      if (msg.message == WM_QUIT)
+        break;
+      /* обрабатываем как всегда */
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    else
+    {
+      /* состояние Idle */
+      SendMessage(hWnd, WM_TIMER, ANIMATION_TIMER, 0);
+    }
+  }
 
-  return msg.wParam;
+  return 0;
 } /* End of 'WinMain' function */
 
 /* Функция обработки сообщения окна.
@@ -86,238 +116,51 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (LRESULT) - в зависимости от сообщения.
  */
-
-VEC *Vertexes, *VertexesProj;
-INT NumOfVertexes;
-
-/* Facet array */
-INT (*Facets)[3];
-INT NumOfFacets;
-
-
-VOID LoadCow( VOID )
-{
-  FILE *F;
-  INT fn = 0, vn = 0;
-  static CHAR Buf[1000];
-
-  if ((F = fopen("cow_new1.object", "rt")) == NULL)
-    return;
-
-  while (fgets(Buf, sizeof(Buf), F) != NULL)
-    if (Buf[0] == 'v' && Buf[1] == ' ')
-      vn++;
-    else if (Buf[0] == 'f' && Buf[1] == ' ')
-      fn++;
-
-  if ((Vertexes = malloc(2 * sizeof(VEC) * vn)) == NULL)
-  {
-    fclose(F);
-    return;
-  }
-  if ((Facets = malloc(sizeof(INT [3]) * fn)) == NULL)
-  {
-    free(Vertexes);
-    fclose(F);
-    return;
-  }
-  NumOfVertexes = vn;
-  NumOfFacets = fn;
-  VertexesProj = Vertexes + NumOfVertexes;
-
-  vn = 0;
-  fn = 0;
-  rewind(F);
-  while (fgets(Buf, sizeof(Buf), F) != NULL)
-    if (Buf[0] == 'v' && Buf[1] == ' ')
-    {
-      DBL x, y, z;
-
-      sscanf(Buf + 2, "%lf%lf%lf", &x, &y, &z);
-      Vertexes[vn].X = x;
-      Vertexes[vn].Y = y;
-      Vertexes[vn].Z = z;
-      vn++;
-    }
-    else if (Buf[0] == 'f' && Buf[1] == ' ')
-    {
-      INT n1, n2, n3;
-
-      sscanf(Buf + 2, "%d%d%d", &n1, &n2, &n3);
-      Facets[fn][0] = n1 - 1;
-      Facets[fn][1] = n2 - 1;
-      Facets[fn][2] = n3 - 1;
-      fn++;
-    }
-
-  fclose(F);
-}
-
-
 LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
                                WPARAM wParam, LPARAM lParam )
 {
-  
-  DOUBLE x,y,w=0,h=0, scale = 1,tim,a;
-  INT i,j;
-  double phaseshift=0;
+  INT w, h;
   HDC hDC;
-  
   CREATESTRUCT *cs;
   PAINTSTRUCT ps;
 
- 
-  static INT WinW, WinH;
-  static HDC hMemDCFrame, hMemDC;
-  static HBITMAP hBmFrame, hBmBack, hBmAnd, hBmXor;
-  SYSTEMTIME st;
 
-  MATR M1,M2,M3;
-
-  LoadCow();
   
-  scale = 59;
   
-  tim = clock();
-  a = tim * 0.030;
-  M1 = MatrRotate(a,0 , 1, 1);
-  M2 = MatrScale(scale,-scale,scale);
-  M3 = MatrTranslate(WinW/2,WinW/2,WinW/2);
-
-
   switch (Msg)
   {
   case WM_CREATE:
     cs = (CREATESTRUCT *)lParam;
-    SetTimer(hWnd, 30, 1, NULL);
-                                                                      
-    
-
-
-    /*** создаем контекст в памяти ***/
-    /* определяем контект окна */
-    hDC = GetDC(hWnd);
-    /* создаем контекст в памяти, совместимый с контекстом окна */
-    hMemDCFrame = CreateCompatibleDC(hDC);
-    hMemDC = CreateCompatibleDC(hDC);
-    /* убираем контекст окна */
-    ReleaseDC(hWnd, hDC);
-
+    if (!VG4_AnimInit(hWnd))
+      return -1;
+    SetTimer(hWnd, ANIMATION_TIMER, 5, NULL);
     return 0;
   case WM_SIZE:
-    WinW = LOWORD(lParam);
-    WinH = HIWORD(lParam);
-
-    /*** выделяем картинку (уничтожая старую) ***/
-    if (hBmFrame != NULL)
-      DeleteObject(hBmFrame);
-    /* создаем в памяти изображение, совместимое с контектом окна */
-    hDC = GetDC(hWnd);
-    hBmFrame = CreateCompatibleBitmap(hDC, WinW, WinH);
-    ReleaseDC(hWnd, hDC);
-    /* выбираем ее в контекст памяти */
-    SelectObject(hMemDCFrame, hBmFrame);
-
-    /* первичная отрисовка в новых размерах */
-    SendMessage(hWnd, WM_TIMER, 0, 0);
+    w = LOWORD(lParam);
+    h = HIWORD(lParam);
+    VG4_AnimResize(w, h);
     return 0;
 
   case WM_TIMER:
-    /* построение всего кадра */
-
-
-    GetLocalTime(&st);
-
-    
-    SelectObject(hMemDCFrame, GetStockObject(DC_BRUSH));
-    SelectObject(hMemDCFrame, GetStockObject(NULL_PEN));
-
-    SetDCBrushColor(hMemDCFrame, RGB(0, 0, 0));
-    Rectangle(hMemDCFrame, 0, 0, WinW + 1, WinH + 1);
-    SelectObject(hMemDCFrame, GetStockObject(DC_PEN));
-    SetDCPenColor(hMemDCFrame, RGB(255, 250, 250));
-
-    
-    
- 
-    SelectObject(hMemDCFrame, GetStockObject(NULL_BRUSH));
-    SelectObject(hMemDCFrame, GetStockObject(DC_PEN));
-    SetDCPenColor(hMemDCFrame, RGB(255, 255, 255));
-    SetDCBrushColor(hMemDCFrame, RGB(0, 111, 0));
-
-
-
-    
-    /* calculate projection */
-    for (i = 0; i < NumOfVertexes; i++)
-    {
-
-      Vertexes[i] = VecMulMatr(Vertexes[i],M1);
-      Vertexes[i] = VecMulMatr(Vertexes[i],M2);
-      Vertexes[i] = VecMulMatr(Vertexes[i],M3);
-  
-    }
-
-
-   
-
-    for (i = 0; i < NumOfFacets; i++)
-    {
-      POINT p[3];
-
-      for (j = 0; j < 3; j++)
-      {
-        p[j].x = Vertexes[Facets[i][j]].X;
-        p[j].y = Vertexes[Facets[i][j]].Y;
-      }
-
-      Polygon(hMemDCFrame, p, 3);
-    }
-
-    for (i = 0; i < NumOfVertexes; i++)
-    {
-      
-        x = Vertexes[i].X;
-        y = Vertexes[i].Y;
-        SetPixelV(hMemDCFrame, x, y, RGB(255, 255, 255));
-    }
-
-    
-    SelectObject(hMemDCFrame, GetStockObject(NULL_PEN));
-    
-    SetDCBrushColor(hMemDC, RGB(0, 0, 0));
-    Rectangle(hMemDC, 0, 0, WinW + 1, WinH + 1);
-    SelectObject(hMemDC, GetStockObject(DC_PEN));
-    SetDCPenColor(hMemDC, RGB(0, 0, 0));
-
-
-    /* засыл перерисовки */
+    VG4_AnimRender();
     InvalidateRect(hWnd, NULL, FALSE);
     return 0;
   case WM_ERASEBKGND:
     return 0;
   case WM_PAINT:
-
-    /* отрисовка */
     hDC = BeginPaint(hWnd, &ps);
-    BitBlt(hDC, 0, 0, WinW, WinH, hMemDCFrame, 0, 0, SRCCOPY);
     EndPaint(hWnd, &ps);
+    VG4_AnimCopyFrame();
     return 0;
   case WM_DESTROY:
-    /* уничтожаем контекст в памяти и картинку */
-    if (hBmFrame != NULL)
-      DeleteObject(hBmFrame);
-    if (hMemDCFrame != NULL)
-      DeleteDC(hMemDCFrame);
-
+    VG4_AnimClose();
     /* Послать сообщение 'WM_QUIT' с параметром 'wParam' 0 - код возврата,
      * замена вызов: PostMessage(hWnd, WM_QUIT, код_возврата, 0); */
     PostQuitMessage(30);
-    KillTimer(hWnd, 30);
+    KillTimer(hWnd, ANIMATION_TIMER);
     return 0;
   }
   return DefWindowProc(hWnd, Msg, wParam, lParam);
 } /* End of 'MyWindowFunc' function */
 
-
-/* END OF 'T03DBLBF.C' FILE */
+/* END OF 'MAIN.C' FILE */
