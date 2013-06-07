@@ -48,7 +48,7 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 
 
-  VG4_AnimAdd(CowCreate(750,450));
+  AnimAdd(CowCreate(600,0));
  
 
   wc.cbSize = sizeof(WNDCLASSEX); /* Размер структуры для совместимости */
@@ -131,18 +131,18 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
   {
   case WM_CREATE:
     cs = (CREATESTRUCT *)lParam;
-    if (!VG4_AnimInit(hWnd))
+    if (!AnimInit(hWnd))
       return -1;
     SetTimer(hWnd, ANIMATION_TIMER, 5, NULL);
     return 0;
   case WM_SIZE:
     w = LOWORD(lParam);
     h = HIWORD(lParam);
-    VG4_AnimResize(w, h);
+    AnimResize(w, h);
     return 0;
 
   case WM_TIMER:
-    VG4_AnimRender();
+    AnimRender();
     InvalidateRect(hWnd, NULL, FALSE);
     return 0;
   case WM_ERASEBKGND:
@@ -150,10 +150,10 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
   case WM_PAINT:
     hDC = BeginPaint(hWnd, &ps);
     EndPaint(hWnd, &ps);
-    VG4_AnimCopyFrame();
+    AnimCopyFrame();
     return 0;
   case WM_DESTROY:
-    VG4_AnimClose();
+    AnimClose();
     /* Послать сообщение 'WM_QUIT' с параметром 'wParam' 0 - код возврата,
      * замена вызов: PostMessage(hWnd, WM_QUIT, код_возврата, 0); */
     PostQuitMessage(30);

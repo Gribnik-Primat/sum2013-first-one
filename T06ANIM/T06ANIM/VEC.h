@@ -1,3 +1,8 @@
+#ifndef __VEC_H_
+#define __VEC_H_
+
+
+#include "def.h"
 #include <math.h>
 #include <windows.h>
 
@@ -15,6 +20,8 @@ typedef struct tagMATR
   DBL A[4][4];
 } MATR;
 
+
+static VEC LOC,AT,UP;
 
 /* функции реализации */
 
@@ -170,6 +177,7 @@ __inline MATR MatrRotateY( DBL AngleeDegree )
   m.A[2][2] = cos(AngleeDegree);
   return m;
 }
+
 
 __inline MATR MatrRotateZ( DBL AngleeDegree )
 {
@@ -338,8 +346,39 @@ __inline MATR MatrInverse( MATR M )
 }
 
 
+__inline MATR ViewLookAt(VEC LOC, VEC AT, VEC UP)
+{
+  VEC
+    DIR = VecSubVec(AT,LOC),
+    RIGHT = VecCrossVec(DIR,UP);
+  MATR M;
+  DIR = VecNormalize(DIR);
+  RIGHT = VecNormalize(RIGHT);
+  M.A[0][0] = RIGHT.X;
+  M.A[1][0] = RIGHT.Y;
+  M.A[2][0] = RIGHT.Z;
+  M.A[3][0] = VecDotVec(RIGHT,LOC);
+
+  M.A[0][1] = UP.X;
+  M.A[1][1] = UP.Y;
+  M.A[2][1] = UP.Z;
+  M.A[3][1] = VecDotVec(UP,LOC);
+
+  M.A[0][2] = -DIR.X;
+  M.A[1][2] = -DIR.Y;
+  M.A[2][2] = -DIR.Z;
+  M.A[3][2] = -DIR.X*LOC.X + DIR.Y*LOC.Y + DIR.Z*LOC.Z;
+
+  M.A[0][3] = 0;
+  M.A[1][3] = 0;
+  M.A[2][3] = 0;
+  M.A[3][3] = 1;
+
+  return M;
+}
 
 
 
 
+#endif /* __VEC_H_ */
 

@@ -183,6 +183,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Def.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UNITS.h"
+				>
+			</File>
+			<File
 				RelativePath=".\VEC.h"
 				>
 			</File>
@@ -204,6 +212,10 @@
 			</File>
 			<File
 				RelativePath=".\MAIN.c"
+				>
+			</File>
+			<File
+				RelativePath=".\MEGACOW.c"
 				>
 			</File>
 			<File

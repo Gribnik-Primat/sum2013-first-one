@@ -49,7 +49,7 @@ INT NumOfVertexes;
 INT (*Facets)[3];
 INT NumOfFacets;
 
-static vg4ANIM VG4_Anim;
+static vg4ANIM Anim;
 
 VOID LoadCow( VOID )
 {
@@ -111,90 +111,93 @@ VOID LoadCow( VOID )
 
 
 
-
 static VOID CowRender( COW *Unit, vg4ANIM *Ani )
 {
   
   
   DBL tim = (DBL)clock() / CLOCKS_PER_SEC;
   INT a,b,c,i,x,y,j;
-  static INT scale = 15;
-  MATR M1,M2,M3,M4,M5;
+  static INT scale = 16;
+  MATR M1,M2,M3,M4,M5,M6;
+ 
+  VEC LOC,AT,UP;
+
+  LOC.X = -100;
+  LOC.Y = 0;
+  LOC.Z = 100;
+
+  AT.X = Unit->X;
+  AT.Y = Unit->Y;
+  AT.Z = 300;
   
+  UP.X = 1;
+  UP.Y = 1;
+  UP.Z = 0;
+
   LoadCow();
   
 
   
-  tim = clock();
-
-
   /* calculate projection */
     
   if ((i = joyGetNumDevs()) > 1)
   {
     JOYCAPS jc;
 
-    if (joyGetDevCaps(VG4_Anim.JCKID1, &jc, sizeof(jc)) == JOYERR_NOERROR)
+    if (joyGetDevCaps(Anim.JCKID1, &jc, sizeof(jc)) == JOYERR_NOERROR)
     {
       JOYINFOEX ji;
 
       ji.dwSize = sizeof(ji);
       ji.dwFlags = JOY_RETURNALL;
 
-      if (joyGetPosEx(VG4_Anim.JCKID1, &ji) == JOYERR_NOERROR)
+      if (joyGetPosEx(Anim.JCKID1, &ji) == JOYERR_NOERROR)
       {
-        memcpy(VG4_Anim.JButOld, VG4_Anim.JBut, 32);
+        memcpy(Anim.JButOld, Anim.JBut, 32);
         for (i = 0; i < 32; i++)
-          VG4_Anim.JBut[i] = (ji.dwButtons >> i) & 1;
+          Anim.JBut[i] = (ji.dwButtons >> i) & 1;
 
-        VG4_Anim.Jx = 2.0 * (ji.dwXpos - jc.wXmin) / (jc.wXmax - jc.wXmin) - 1;
-        VG4_Anim.Jy = 2.0 * (ji.dwYpos - jc.wYmin) / (jc.wYmax - jc.wYmin) - 1;
-        VG4_Anim.Jz = 2.0 * (ji.dwZpos - jc.wZmin) / (jc.wZmax - jc.wZmin) - 1;
-        VG4_Anim.Jr = 2.0 * (ji.dwRpos - jc.wRmin) / (jc.wRmax - jc.wRmin) - 1;
+        Anim.Jx = 2.0 * (ji.dwXpos - jc.wXmin) / (jc.wXmax - jc.wXmin) - 1;
+        Anim.Jy = 2.0 * (ji.dwYpos - jc.wYmin) / (jc.wYmax - jc.wYmin) - 1;
+        Anim.Jz = 2.0 * (ji.dwZpos - jc.wZmin) / (jc.wZmax - jc.wZmin) - 1;
+        Anim.Jr = 2.0 * (ji.dwRpos - jc.wRmin) / (jc.wRmax - jc.wRmin) - 1;
 
         if (ji.dwPOV == 0xFFFF)
-          VG4_Anim.JPov = 0;
+          Anim.JPov = 0;
         else
-          VG4_Anim.JPov = ji.dwPOV / 4500 + 1;
+          Anim.JPov = ji.dwPOV / 4500 + 1;
       }
     }
   }
   
-  b = 180 * VG4_Anim.Jx;
-  a = 180 * VG4_Anim.Jy;
-  c = 180 * VG4_Anim.Jr;
+  b = 180 * Anim.Jx;
+  a = 180 * Anim.Jy;
+  c = 180 * Anim.Jr; 
 
 
-  switch(VG4_Anim.JPov)
-  {
-    case 1:
-      scale += 1;
-      break;
-    case 5:
-      scale -= 1;
-  }
-  
-  M1 = MatrRotate(a,VG4_Anim.Jx, 0, 0);
-  M2 = MatrRotate(b,0, VG4_Anim.Jy,0);
-  M3 = MatrRotate(c,0, 0, VG4_Anim.Jz);  
+  M1 = MatrRotate(a,Anim.Jx, 0, 0);
+  M2 = MatrRotate(b,0, Anim.Jy,0);
+  M3 = MatrRotate(c,0, 0, Anim.Jz);  
   M4 = MatrScale(scale,-scale,scale);
   M5 = MatrTranslate(Unit->X,Unit->Y,500);
- 
+  M6 = ViewLookAt(LOC,AT,UP); 
   
-  
+
   for (i = 0; i < NumOfVertexes; i++)
   {
 
     Vertexes[i] = VecMulMatr(Vertexes[i],M1);
-    Vertexes[i] = VecMulMatr(Vertexes[i],M2);
+    Vertexes[i] = VecMulMatr(Vertexes[i],M2); 
     Vertexes[i] = VecMulMatr(Vertexes[i],M3);
     Vertexes[i] = VecMulMatr(Vertexes[i],M4);
     Vertexes[i] = VecMulMatr(Vertexes[i],M5);
-     
+    Vertexes[i] = VecMulMatr(Vertexes[i],M6);     
      
   }
 
-  for (i = 0; i < NumOfFacets; i++)
+  
+
+  /*for (i = 0; i < NumOfFacets; i++)
     {
       POINT p[3];
 
@@ -205,7 +208,8 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
       }
 
       Polygon(Ani->hDC, p, 3);
-    }
+    } */
+  
   
   for (i = 0; i < NumOfVertexes; i++)
   {
@@ -215,6 +219,7 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
       SetPixelV(Ani->hDC, x, y, RGB(255, 255, 255));
   }
 
+  
 
 
 } /* End of 'CowRender' function */
