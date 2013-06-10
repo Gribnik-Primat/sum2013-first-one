@@ -3,6 +3,7 @@
 
 
 #include "def.h"
+#include "anim.h"
 #include <math.h>
 #include <windows.h>
 
@@ -20,8 +21,8 @@ typedef struct tagMATR
   DBL A[4][4];
 } MATR;
 
-
 static VEC LOC,AT,UP;
+
 
 /* функции реализации */
 
@@ -235,6 +236,7 @@ __inline MATR MatrMulMatr( MATR M1, MATR M2 )
     for (j = 0; j < 4; j++)
       for (M.A[i][j] = 0, k = 0; k < 4; k++)
         M.A[i][j] += M1.A[i][k] * M2.A[k][j];
+  return M;
 }
 
 

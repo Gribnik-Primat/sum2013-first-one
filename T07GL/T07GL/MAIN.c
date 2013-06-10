@@ -143,14 +143,13 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 
   case WM_TIMER:
     AnimRender();
-    InvalidateRect(hWnd, NULL, FALSE);
+    AnimCopyFrame();
     return 0;
   case WM_ERASEBKGND:
     return 0;
   case WM_PAINT:
     hDC = BeginPaint(hWnd, &ps);
     EndPaint(hWnd, &ps);
-    AnimCopyFrame();
     return 0;
   case WM_DESTROY:
     AnimClose();

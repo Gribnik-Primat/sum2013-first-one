@@ -4,6 +4,6 @@
 #include "anim.h"
 
 /* Функция сроздания нового куба */
-vg4UNIT * CowCreate( INT X, INT Y );
+vg4UNIT * CowCreate( INT X, INT Y);
 
 #endif /* __UNITS_H_ */

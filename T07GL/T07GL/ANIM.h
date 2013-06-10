@@ -8,6 +8,7 @@
 #define __ANIM_H_
 
 #include "def.h"
+#include "vec.h"
 
 /* Тип представления контектса анимации */
 
@@ -29,8 +30,11 @@ typedef struct tagvg4ANIM
   HDC hDC;        /* Контекст кадра в памяти */
   HGLRC hGLRC;
   HBITMAP hFrame; /* Битмап - буфер кадра */
+  MATR Mworld;
+  MATR Mview;
+  MATR Mproj;
   INT W, H,JPov,JCKID1;/* Размеры кадра анимации */
-  DOUBLE Jx,Jz,Jy,Jr;
+  DOUBLE Jx,Jz,Jy,Jr,Wp,Hp,PD;
   BYTE JButOld[32],JBut[32];
   DWORD *Bits; 
   DBL
@@ -38,10 +42,13 @@ typedef struct tagvg4ANIM
   DeltaTime,       /* время в секундах с прошлого кадра */
   GlobalTime,      /* время в сукундых со старта программы без паузы */
   GlobalDeltaTime, /* время в секундах с прошлого кадра без паузы */
-  FPS;             /* количество кадров в секунду */
+  FPS;  /* количество кадров в секунду */
   BOOL
-  IsPause;  /* Изображение кадра по точкам (DWORD на точку) */
+    IsPause;  /* Изображение кадра по точкам (DWORD на точку) */
 } vg4ANIM;
+
+
+
 
 /*** Типы внутренних функций-методов объектов-единиц анимации ***/
 typedef struct tagvg4UNIT vg4UNIT;

@@ -117,13 +117,19 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
 {
   
   BYTE Keys[256],KeysOld[256];
-  DBL tim = (DBL)clock() / CLOCKS_PER_SEC;
+  DBL tim = (DBL)clock() / CLOCKS_PER_SEC,Wp = 0.7 * Anim.W/Anim.H,hp=0.7,PD=1.0;
   INT i,j;
-  static INT scale = 16;
-  MATR M4;
+  MATR WVP;
+  MATR M1,M2;
   static UINT CowProg;
  
 
+  M1 = MatrScale(59,-59,59);
+  M2 = MatrTranslate(Unit->X,Unit->Y,Unit->Z);
+  MatrWorld = MatrMulMatr(M1,M2);
+  MatrView = MatrViewLookAt(VecSet(8,10,8),VecSet(0,0,0),VecSet(1,1,0));
+  MatrProj = MatrFrustrum(-1,-1,1,1,-1,100);
+  WVP = MatrMulMatr(MatrProj,MatrMulMatr(MatrWorld,MatrView)); 
 
 
   LoadCow();
@@ -169,50 +175,40 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
     }
   }
 
-  CowProg = ShadProgInit("a.vert", "a.frag");
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
-  glUseProgram(CowProg);
-  glColor3d(1, 1, 0);
-  /*
-  glRectd(-1, -1, 0, 1);
-  glColor3d(1, 0, 0);
-  glRectd(0, 0, 0.5, 0.5);
-  glColor3d(0, 1, 0);
-  glRectd(0.25, 0.25, 0.75, 0.75);
-  glColor3d(0, 0, 1);
-  glRectd(0.5, 0.5, 1, 1);
-  */
 
   j = glGetUniformLocation(CowProg, "DrawColor");
-  glUniform4d(j, 1, 0, 0, 1);
-
-  
-  
-  //M4 = MatrScale(59,-59,59);
-  
-  
-
   for (i = 0; i < NumOfVertexes; i++)
   {
+    VEC v;
+    v = Vertexes[i];
+    v.X += Unit->X;
+    v.Y += Unit->Y;
+    v.Z += 10;
 
-    // Vertexes[i] = VecMulMatr(Vertexes[i],M4); 
-     
-    glColor3d(1, 1, 0);
-    glBegin(GL_TRIANGLES);
-    glVertex3d(Vertexes[i].X, 0, 0);
-    glVertex3d(0, Vertexes[i].Y, 0);
-    glVertex3d(0, 0, Vertexes[i].Z);
-    glEnd();
-
+    VertexesProj[i] = WorldToScreen(v); 
   }
 
-  
+  CowProg = ShadProgInit("a.vert", "a.frag");
+  glUseProgram(CowProg);
 
-  
+  for (i = 0; i < NumOfFacets; i++)
+  {
+    POINT p[3];
 
-  
-  glEnd();
+    for (j = 0; j < 3; j++)
+    {
+      p[j].x = VertexesProj[Facets[i][j]].x;         
+      p[j].y = VertexesProj[Facets[i][j]].y;
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glColor3d(0.7, 0.5, 0.3);
+    glBegin(GL_TRIANGLES);
+      glVertex3f(p[0].x, p[0].y, 0);
+      glVertex3f(p[1].x, p[1].y, 0);
+      glVertex3f(p[2].x, p[2].y, 0);
+    glEnd();
+  } 
   glUseProgram(0);
   
 
