@@ -26,15 +26,15 @@ static VEC LOC,AT,UP;
 /* функции реализации */
 
 __inline DBL MatrDeterm3x3( DBL A11, DBL A12, DBL A13,
-                   DBL A21, DBL A22, DBL A23,
-                   DBL A31, DBL A32, DBL A33 )
+                           DBL A21, DBL A22, DBL A23,
+                           DBL A31, DBL A32, DBL A33 )
 {
   return A11 * A22 * A33 -
-         A11 * A23 * A32 -
-         A12 * A21 * A33 +
-         A12 * A23 * A31 +
-         A13 * A21 * A32 - 
-         A13 * A22 * A31;
+    A11 * A23 * A32 -
+    A12 * A21 * A33 +
+    A12 * A23 * A31 +
+    A13 * A21 * A32 - 
+    A13 * A22 * A31;
 }
 
 __inline VEC VecSet( DBL X, DBL Y, DBL Z )
@@ -149,7 +149,7 @@ __inline MATR MatrTranslate( DBL Dx, DBL Dy, DBL Dz )
 __inline MATR MatrScale( DBL Sx, DBL Sy, DBL Sz )
 {
   MATR m = UnitMatrix;
-  
+
   m.A[0][0] = Sx;
   m.A[1][1] = Sy;
   m.A[2][2] = Sz;
@@ -159,7 +159,7 @@ __inline MATR MatrScale( DBL Sx, DBL Sy, DBL Sz )
 __inline MATR MatrRotateX( DBL AngleeDegree )
 {
   MATR m = UnitMatrix;
-  
+
   m.A[1][1] = cos(AngleeDegree);
   m.A[1][2] = -sin(AngleeDegree);
   m.A[2][1] = sin(AngleeDegree);
@@ -170,7 +170,7 @@ __inline MATR MatrRotateX( DBL AngleeDegree )
 __inline MATR MatrRotateY( DBL AngleeDegree )
 {
   MATR m = UnitMatrix;
-  
+
   m.A[0][0] = cos(AngleeDegree);
   m.A[2][0] = -sin(AngleeDegree);
   m.A[0][2] = sin(AngleeDegree);
@@ -182,7 +182,7 @@ __inline MATR MatrRotateY( DBL AngleeDegree )
 __inline MATR MatrRotateZ( DBL AngleeDegree )
 {
   MATR m = UnitMatrix;
-  
+
   m.A[0][0] = cos(AngleeDegree);
   m.A[0][1] = -sin(AngleeDegree);
   m.A[1][0] = sin(AngleeDegree);
@@ -198,7 +198,7 @@ __inline MATR MatrRotate( DBL AngleeDegree, DBL X, DBL Y, DBL Z )
     len = X * X + Y * Y + Z * Z;
 
   if (len != 0 && len != 1)
-   len = sqrt(len),  X /= len, Y /= len, Z /= len;
+    len = sqrt(len),  X /= len, Y /= len, Z /= len;
   X *= si;
   Y *= si;
   Z *= si;
@@ -244,17 +244,17 @@ __inline DBL MatrDeterm( MATR M )
 {
   return
     M.A[0][0] * MatrDeterm3x3(M.A[1][1], M.A[1][2], M.A[1][3],
-                              M.A[2][1], M.A[2][2], M.A[2][3],
-                              M.A[3][1], M.A[3][2], M.A[3][3]) - 
+    M.A[2][1], M.A[2][2], M.A[2][3],
+    M.A[3][1], M.A[3][2], M.A[3][3]) - 
     M.A[0][1] * MatrDeterm3x3(M.A[1][0], M.A[1][2], M.A[1][3],
-                              M.A[2][0], M.A[2][2], M.A[2][3],
-                              M.A[3][0], M.A[3][2], M.A[3][3]) +
+    M.A[2][0], M.A[2][2], M.A[2][3],
+    M.A[3][0], M.A[3][2], M.A[3][3]) +
     M.A[0][2] * MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][3],
-                              M.A[2][0], M.A[2][1], M.A[2][3],
-                              M.A[3][0], M.A[3][1], M.A[3][3]) -
+    M.A[2][0], M.A[2][1], M.A[2][3],
+    M.A[3][0], M.A[3][1], M.A[3][3]) -
     M.A[0][3] * MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][2],
-                              M.A[2][0], M.A[2][1], M.A[2][2],
-                              M.A[3][0], M.A[3][1], M.A[3][2]);
+    M.A[2][0], M.A[2][1], M.A[2][2],
+    M.A[3][0], M.A[3][1], M.A[3][2]);
 }
 
 __inline VEC VecCrossVec( VEC V1, VEC V2 )
@@ -263,7 +263,7 @@ __inline VEC VecCrossVec( VEC V1, VEC V2 )
     V1.Y * V2.Z - V1.Z * V2.Y,
     V1.Z * V2.X - V1.X * V2.Z,
     V1.X * V2.Y - V1.Y * V2.X
-  );
+    );
 }
 
 __inline MATR MatrInverse( MATR M )
@@ -276,108 +276,137 @@ __inline MATR MatrInverse( MATR M )
 
   r.A[0][0] =
     MatrDeterm3x3(M.A[1][1], M.A[1][2], M.A[1][3],
-                 M.A[2][1], M.A[2][2], M.A[2][3],
-                 M.A[3][1], M.A[3][2], M.A[3][3]) / det;
+    M.A[2][1], M.A[2][2], M.A[2][3],
+    M.A[3][1], M.A[3][2], M.A[3][3]) / det;
   r.A[1][0] = 
     -MatrDeterm3x3(M.A[1][0], M.A[1][2], M.A[1][3],
-                  M.A[2][0], M.A[2][2], M.A[2][3],
-                  M.A[3][0], M.A[3][2], M.A[3][3]) / det;
+    M.A[2][0], M.A[2][2], M.A[2][3],
+    M.A[3][0], M.A[3][2], M.A[3][3]) / det;
   r.A[2][0] =
     MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][3],
-                  M.A[2][0], M.A[2][1], M.A[2][3],
-                  M.A[3][0], M.A[3][1], M.A[3][3]) / det;
+    M.A[2][0], M.A[2][1], M.A[2][3],
+    M.A[3][0], M.A[3][1], M.A[3][3]) / det;
   r.A[3][0] =
     -MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][2],
-                  M.A[2][0], M.A[2][1], M.A[2][2],
-                  M.A[3][0], M.A[3][1], M.A[3][2]) / det;
+    M.A[2][0], M.A[2][1], M.A[2][2],
+    M.A[3][0], M.A[3][1], M.A[3][2]) / det;
 
   r.A[0][1] =
     -MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
-                 M.A[2][1], M.A[2][2], M.A[2][3],
-                 M.A[3][1], M.A[3][2], M.A[3][3]) / det;
+    M.A[2][1], M.A[2][2], M.A[2][3],
+    M.A[3][1], M.A[3][2], M.A[3][3]) / det;
   r.A[1][1] = 
     MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
-                  M.A[2][0], M.A[2][2], M.A[2][3],
-                  M.A[3][0], M.A[3][2], M.A[3][3]) / det;
+    M.A[2][0], M.A[2][2], M.A[2][3],
+    M.A[3][0], M.A[3][2], M.A[3][3]) / det;
   r.A[2][1] =
     -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
-                  M.A[2][0], M.A[2][1], M.A[2][3],
-                  M.A[3][0], M.A[3][1], M.A[3][3]) / det;
+    M.A[2][0], M.A[2][1], M.A[2][3],
+    M.A[3][0], M.A[3][1], M.A[3][3]) / det;
   r.A[3][1] =
     MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
-                  M.A[2][0], M.A[2][1], M.A[2][2],
-                  M.A[3][0], M.A[3][1], M.A[3][2]) / det;
+    M.A[2][0], M.A[2][1], M.A[2][2],
+    M.A[3][0], M.A[3][1], M.A[3][2]) / det;
 
   r.A[0][2] =
     MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
-                 M.A[1][1], M.A[1][2], M.A[1][3],
-                 M.A[3][1], M.A[3][2], M.A[3][3]) / det;
+    M.A[1][1], M.A[1][2], M.A[1][3],
+    M.A[3][1], M.A[3][2], M.A[3][3]) / det;
   r.A[1][2] = 
     -MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
-                  M.A[1][0], M.A[1][2], M.A[1][3],
-                  M.A[3][0], M.A[3][2], M.A[3][3]) / det;
+    M.A[1][0], M.A[1][2], M.A[1][3],
+    M.A[3][0], M.A[3][2], M.A[3][3]) / det;
   r.A[2][2] =
     MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
-                  M.A[1][0], M.A[1][1], M.A[1][3],
-                  M.A[3][0], M.A[3][1], M.A[3][3]) / det;
+    M.A[1][0], M.A[1][1], M.A[1][3],
+    M.A[3][0], M.A[3][1], M.A[3][3]) / det;
   r.A[3][2] =
     -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
-                  M.A[1][0], M.A[1][1], M.A[1][2],
-                  M.A[3][0], M.A[3][1], M.A[3][2]) / det;
+    M.A[1][0], M.A[1][1], M.A[1][2],
+    M.A[3][0], M.A[3][1], M.A[3][2]) / det;
 
   r.A[0][3] =
     -MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
-                 M.A[1][1], M.A[1][2], M.A[1][3],
-                 M.A[2][1], M.A[2][2], M.A[2][3]) / det;
+    M.A[1][1], M.A[1][2], M.A[1][3],
+    M.A[2][1], M.A[2][2], M.A[2][3]) / det;
   r.A[1][3] = 
     MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
-                  M.A[1][0], M.A[1][2], M.A[1][3],
-                  M.A[2][0], M.A[2][2], M.A[2][3]) / det;
+    M.A[1][0], M.A[1][2], M.A[1][3],
+    M.A[2][0], M.A[2][2], M.A[2][3]) / det;
   r.A[2][3] =
     -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
-                  M.A[1][0], M.A[1][1], M.A[1][3],
-                  M.A[2][0], M.A[2][1], M.A[2][3]) / det;
+    M.A[1][0], M.A[1][1], M.A[1][3],
+    M.A[2][0], M.A[2][1], M.A[2][3]) / det;
   r.A[3][3] =
     MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
-                  M.A[1][0], M.A[1][1], M.A[1][2],
-                  M.A[2][0], M.A[2][1], M.A[2][2]) / det;
+    M.A[1][0], M.A[1][1], M.A[1][2],
+    M.A[2][0], M.A[2][1], M.A[2][2]) / det;
 
   return r;  
 }
 
 
-__inline MATR ViewLookAt(VEC LOC, VEC AT, VEC UP)
+
+__inline MATR MatrViewLookAt(VEC Loc, VEC At, VEC Up)
 {
-  VEC
-    DIR = VecSubVec(AT,LOC),
-    RIGHT = VecCrossVec(DIR,UP);
-  MATR M;
-  DIR = VecNormalize(DIR);
-  RIGHT = VecNormalize(RIGHT);
-  M.A[0][0] = RIGHT.X;
-  M.A[1][0] = RIGHT.Y;
-  M.A[2][0] = RIGHT.Z;
-  M.A[3][0] = VecDotVec(RIGHT,LOC);
+  VEC 
+    Dir = VecSubVec(At, Loc),
+    Right = VecCrossVec(Dir, Up);
+  MATR m;
 
-  M.A[0][1] = UP.X;
-  M.A[1][1] = UP.Y;
-  M.A[2][1] = UP.Z;
-  M.A[3][1] = VecDotVec(UP,LOC);
 
-  M.A[0][2] = -DIR.X;
-  M.A[1][2] = -DIR.Y;
-  M.A[2][2] = -DIR.Z;
-  M.A[3][2] = -DIR.X*LOC.X + DIR.Y*LOC.Y + DIR.Z*LOC.Z;
+  Dir = VecNormalize(Dir);
+  Right = VecNormalize(Right);
+  Up = VecCrossVec(Right, Dir);
 
-  M.A[0][3] = 0;
-  M.A[1][3] = 0;
-  M.A[2][3] = 0;
-  M.A[3][3] = 1;
+
+  m.A[0][0] = Right.X;
+  m.A[0][1] = Up.X;
+  m.A[0][2] = Dir.X;
+  m.A[0][3] = 0;
+  m.A[1][0] = Right.Y;
+  m.A[1][1] = Up.Y;
+  m.A[1][2] = Dir.Y;
+  m.A[1][3] = 0;
+  m.A[2][0] = Right.Z;
+  m.A[2][1] = Up.Z;
+  m.A[2][2] = Dir.Z;
+  m.A[2][3] = 0;
+  m.A[3][0] = VecDotVec(Loc, Right);
+  m.A[3][1] = VecDotVec(Loc, Up);
+  m.A[3][2] = -VecDotVec(Loc, Dir);
+  m.A[3][3] =  1;
+
+  return m;
+}
+
+__inline MATR MatrFrustrum(INT l,INT t,INT r,INT b,INT n,INT f)
+{
+  MATR M = UnitMatrix;
+  M.A[0][0] = (2*n)/(r-l);
+  M.A[1][1] = (2*n)/(t-b);
+  M.A[2][0] = (r+l)/(r-l);
+  M.A[2][1] = (t+b)/(t-b);
+  M.A[2][2] = -(f+n)/(f-n);
+  M.A[2][3] = -1;
+  M.A[3][2] = (-2*n*f)/(f-n);
 
   return M;
 }
 
+__inline MATR MatrOrto(INT l,INT t,INT r,INT b,INT n,INT f)
+{
+  MATR M = UnitMatrix;
+  M.A[0][0] = 2/(r-l);
+  M.A[1][1] = 2/(t-b);
+  M.A[2][2] = -2/(f-n);
+  M.A[3][1] = -(t+b)/(t-b);
+  M.A[3][2] = -(f+n)/(f-n);
+  M.A[3][0] = -(r+l)/(r-l);
+  M.A[3][3] = 1;
 
+  return M;
+}
 
 
 #endif /* __VEC_H_ */
