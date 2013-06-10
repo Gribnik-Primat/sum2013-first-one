@@ -43,7 +43,6 @@ LRESULT CALLBACK MyWindowFunc( HWND hWnd, UINT Msg,
 INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     CHAR *CmdLine, INT ShowCmd )
 {
-  INT i;
   WNDCLASSEX wc;
   MSG msg;
   HWND hWnd;

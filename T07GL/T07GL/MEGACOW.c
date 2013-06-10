@@ -118,9 +118,9 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
   
   BYTE Keys[256],KeysOld[256];
   DBL tim = (DBL)clock() / CLOCKS_PER_SEC;
-  INT a,b,c,i,x,y,j;
+  INT i,j;
   static INT scale = 16;
-  MATR M1,M2,M3,M4,M5,M6;
+  MATR M4;
   static UINT CowProg;
  
 
@@ -171,7 +171,7 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
 
   CowProg = ShadProgInit("a.vert", "a.frag");
 
-  /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
   glUseProgram(CowProg);
   glColor3d(1, 1, 0);
   /*
@@ -187,11 +187,31 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
   j = glGetUniformLocation(CowProg, "DrawColor");
   glUniform4d(j, 1, 0, 0, 1);
 
-  glColor3d(1, 1, 0);
-  glBegin(GL_TRIANGLES);
-    glVertex3d(0, 0, 0);
-    glVertex3d(1, 0, 0);
-    glVertex3d(0, 1, 0);
+  
+  
+  //M4 = MatrScale(59,-59,59);
+  
+  
+
+  for (i = 0; i < NumOfVertexes; i++)
+  {
+
+    // Vertexes[i] = VecMulMatr(Vertexes[i],M4); 
+     
+    glColor3d(1, 1, 0);
+    glBegin(GL_TRIANGLES);
+    glVertex3d(Vertexes[i].X, 0, 0);
+    glVertex3d(0, Vertexes[i].Y, 0);
+    glVertex3d(0, 0, Vertexes[i].Z);
+    glEnd();
+
+  }
+
+  
+
+  
+
+  
   glEnd();
   glUseProgram(0);
   

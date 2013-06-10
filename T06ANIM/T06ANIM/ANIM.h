@@ -27,6 +27,7 @@ typedef struct tagvg4ANIM
 {
   HWND hWnd;      /* Рабочее окно анимации */
   HDC hDC;        /* Контекст кадра в памяти */
+  HGLRC hGLRC;
   HBITMAP hFrame; /* Битмап - буфер кадра */
   INT W, H,JPov,JCKID1;/* Размеры кадра анимации */
   DOUBLE Jx,Jz,Jy,Jr;

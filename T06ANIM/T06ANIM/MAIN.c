@@ -14,6 +14,8 @@
 #define WND_CLASS_NAME "My window class"
 #define ANIMATION_TIMER 30
 
+#pragma comment(lib,"glew32")
+#include <glew.h>
 
 
 
@@ -45,10 +47,9 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   WNDCLASSEX wc;
   MSG msg;
   HWND hWnd;
+               
 
-
-
-  AnimAdd(CowCreate(600,0));
+  AnimAdd(CowCreate(600,350));
  
 
   wc.cbSize = sizeof(WNDCLASSEX); /* Размер структуры для совместимости */

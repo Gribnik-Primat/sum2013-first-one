@@ -29,7 +29,7 @@ static vg4UNIT *VG4_Units[VG4_MAX_UNITS];
 */
 BOOL AnimInit( HWND hWnd )
 {
-  HDC hDC;
+
   INT i;
   PIXELFORMATDESCRIPTOR pfd = {0};
   LARGE_INTEGER li;

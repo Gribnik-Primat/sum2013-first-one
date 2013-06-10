@@ -56,7 +56,7 @@ VOID LoadCow( VOID )
   FILE *F;
   INT fn = 0, vn = 0;
   static CHAR Buf[1000];
-
+                                           
   if ((F = fopen("cow_new1.object", "rt")) == NULL)
     return;
 
@@ -111,30 +111,29 @@ VOID LoadCow( VOID )
 
 
 
+
+
 static VOID CowRender( COW *Unit, vg4ANIM *Ani )
 {
   
-  
+  BYTE Keys[256],KeysOld[256];
   DBL tim = (DBL)clock() / CLOCKS_PER_SEC;
   INT a,b,c,i,x,y,j;
   static INT scale = 16;
   MATR M1,M2,M3,M4,M5,M6;
+  static UINT CowProg;
  
-  VEC LOC,AT,UP;
 
-  LOC.X = -100;
-  LOC.Y = 0;
-  LOC.Z = 100;
 
-  AT.X = Unit->X;
-  AT.Y = Unit->Y;
-  AT.Z = 300;
-  
-  UP.X = 1;
-  UP.Y = 1;
-  UP.Z = 0;
 
   LoadCow();
+
+  memcpy(KeysOld,Keys,256);
+
+  GetKeyboardState(Keys);
+
+  for(i = 0;i < 256; i++)
+    Keys[i]>>=7;
   
 
   
@@ -169,56 +168,32 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
       }
     }
   }
-  
-  b = 180 * Anim.Jx;
-  a = 180 * Anim.Jy;
-  c = 180 * Anim.Jr; 
 
+  CowProg = ShadProgInit("a.vert", "a.frag");
 
-  M1 = MatrRotate(a,Anim.Jx, 0, 0);
-  M2 = MatrRotate(b,0, Anim.Jy,0);
-  M3 = MatrRotate(c,0, 0, Anim.Jz);  
-  M4 = MatrScale(scale,-scale,scale);
-  M5 = MatrTranslate(Unit->X,Unit->Y,500);
-  M6 = ViewLookAt(LOC,AT,UP); 
-  
+  /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
+  glUseProgram(CowProg);
+  glColor3d(1, 1, 0);
+  /*
+  glRectd(-1, -1, 0, 1);
+  glColor3d(1, 0, 0);
+  glRectd(0, 0, 0.5, 0.5);
+  glColor3d(0, 1, 0);
+  glRectd(0.25, 0.25, 0.75, 0.75);
+  glColor3d(0, 0, 1);
+  glRectd(0.5, 0.5, 1, 1);
+  */
 
-  for (i = 0; i < NumOfVertexes; i++)
-  {
+  j = glGetUniformLocation(CowProg, "DrawColor");
+  glUniform4d(j, 1, 0, 0, 1);
 
-    Vertexes[i] = VecMulMatr(Vertexes[i],M1);
-    Vertexes[i] = VecMulMatr(Vertexes[i],M2); 
-    Vertexes[i] = VecMulMatr(Vertexes[i],M3);
-    Vertexes[i] = VecMulMatr(Vertexes[i],M4);
-    Vertexes[i] = VecMulMatr(Vertexes[i],M5);
-    Vertexes[i] = VecMulMatr(Vertexes[i],M6);     
-     
-  }
-
-  
-
-  /*for (i = 0; i < NumOfFacets; i++)
-    {
-      POINT p[3];
-
-      for (j = 0; j < 3; j++)
-      {
-        p[j].x = Vertexes[Facets[i][j]].X;
-        p[j].y = Vertexes[Facets[i][j]].Y;
-      }
-
-      Polygon(Ani->hDC, p, 3);
-    } */
-  
-  
-  for (i = 0; i < NumOfVertexes; i++)
-  {
-    
-      x = Vertexes[i].X;
-      y = Vertexes[i].Y;
-      SetPixelV(Ani->hDC, x, y, RGB(255, 255, 255));
-  }
-
+  glColor3d(1, 1, 0);
+  glBegin(GL_TRIANGLES);
+    glVertex3d(0, 0, 0);
+    glVertex3d(1, 0, 0);
+    glVertex3d(0, 1, 0);
+  glEnd();
+  glUseProgram(0);
   
 
 

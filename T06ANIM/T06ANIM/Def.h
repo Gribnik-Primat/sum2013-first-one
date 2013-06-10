@@ -2,8 +2,15 @@
 #define __DEF_H_
 
 #include <windows.h>
+#include <glew.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
 
-#pragma warning(disable: 4244 4996)
+#pragma comment(lib, "opengl32")
+#pragma comment(lib, "glu32")
+#pragma comment(lib, "glew32")
+
+#pragma warning(disable: 4305 4244 4996)
 
 /* Общие типы */
 typedef __int64 INT64;
