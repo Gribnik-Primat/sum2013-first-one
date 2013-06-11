@@ -28,10 +28,11 @@ typedef struct
 {
   /* Включаем базовые поля объекта анимации */
   VG4_UNIT_BASE_FUNCS;
-  INT X, Y; /* Позиция куба  */
+  INT X, Y, Z; /* Позиция куба  */
   INT RandShift; /* Случайный сдвиг */
   DBL RandScale; /* Случайный масштаб */
   INT Who;       /* Тип объекта */
+  DBL r,g,b;
 } COW;
 
 /* Функция отрисовки куба.
@@ -42,6 +43,10 @@ typedef struct
  *       vg4ANIM *Ani;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
+
+
+static INT CowProg = -2;
+
 VEC *Vertexes, *VertexesProj;
 INT NumOfVertexes;
 
@@ -111,25 +116,114 @@ VOID LoadCow( VOID )
 
 
 
+VEC WorldToScreen( VEC P )
+{
+  VEC P1, P2, P3, P4;
+  VEC pt;
+  DBL Xs, Ys;
+
+  Anim.camera.Mworld = MatrMulMatr(MatrScale(40, 40, 40), MatrTranslate(0, 0, -100)); 
+  Anim.camera.Mview = MatrLookAt(VecSet(0, 0, -3), VecSet(Anim.Jx, Anim.Jy, Anim.Jr), VecSet(0, 1, 0)); 
+  Anim.camera.Mproj = MatrFrustrum(-1, 1, 1, -1, 1, 10);
+
+
+  Anim.Wp = 1.0;
+  Anim.Hp = 1.0;
+  Anim.PD = 1;
+
+  P1 = VecMulMatr(P, Anim.camera.Mworld);
+  P2 = VecMulMatr(P1, Anim.camera.Mview);
+  P3 = VecMulMatr(P2, Anim.camera.Mproj);
+
+  P4.X = P2.X * Anim.PD/P2.Z;
+  P4.Y = P2.Y * Anim.PD/P2.Z;                                            
+
+
+
+  P4.X *= 2/Anim.Wp;
+  P4.Y *= 2/Anim.Hp;
+
+  Xs = (P4.X + 1) * (Anim.W - 1);
+  Ys = (-P4.Y + 1) * (Anim.H - 1);
+  pt.X = Xs;
+  pt.Y = Ys;
+  return pt;
+}
+
 
 
 static VOID CowRender( COW *Unit, vg4ANIM *Ani )
 {
+  
+  /*if (CowProg < -1)
+  {
+    CowProg = ShadProgInit("Z:\\sum2013\\T06anim\\a.vert", "Z:\\sum2013\\T06anim\\a.frag");
+  }
+  if (Unit->model != NULL && CowProg >= 0)
+  {
+    HDC hDC = Ani->hDC;
+    POLYGONAL_MODEL * model = Unit->model;
+    VEC * vertexes = model->vertexes;
+    FACET * facets = model->facets;
+    MATR translateMatrix = MatrTranslate(Unit->X, Unit->Y, Unit->Z);
+    MATR rotateMatrix = MatrRotateZ(Unit->RotZ);
+    MATR transformMatrix = MatrMulMatr(MatrMulMatr(Unit->transformMatrix, rotateMatrix), translateMatrix);
+    MATR fullMatr = MatrMulMatr(transformMatrix, Ani->camera.MVP);
+    VEC * vertexesProj = Unit->model->vertProj;
+    INT i, j;
+    UINT locMatr, locTime;
+
+    glColor3f(Unit->r, Unit->g, Unit->b);
+        
+    glUseProgram(CowProg);
+    locMatr = glGetUniformLocation(CowProg, "Matr");
+    locTime = glGetUniformLocation(CowProg, "Time");
+    if (locMatr >= 0)
+    {
+      glUniformMatrix4fv(locMatr, 1, FALSE, &fullMatr.A[0][0]);
+    }
+    if (locTime >= 0)
+    {
+      glUniform1f(locTime, (float)(Ani->timer.activeTime));
+    }
+
+    // Draw model
+    glBegin(GL_TRIANGLES);
+    for (i = 0; i < model->facetsNum; i++)
+    {
+      for (j = 0; j < 3; j++)
+      {
+        VEC v = vertexes[facets[i].vertexes[j]];
+        glVertex3f(v.X, v.Y, v.Z);
+      }
+    }
+    glEnd();
+    glUseProgram(0);
+  }
+} /* End of 'CubeRender' */
   
   BYTE Keys[256],KeysOld[256];
   DBL tim = (DBL)clock() / CLOCKS_PER_SEC,Wp = 0.7 * Anim.W/Anim.H,hp=0.7,PD=1.0;
   INT i,j;
   MATR WVP;
   MATR M1,M2;
-  static UINT CowProg;
- 
+  static UINT CowProg,locMatr,locTime;
+  MATR fullMatr;
+  
+  if (CowProg < -1)
+  {
+    CowProg = ShadProgInit("Z:\\sum2013\\T07anim\\a.vert", "Z:\\sum2013\\T07anim\\a.frag");
+  }
+
+  setCamera(VecSet(-100, 600, -136), VecSet(unit->X, unit->Y, -136), VecSet(0, 0, 1));
 
   M1 = MatrScale(59,-59,59);
   M2 = MatrTranslate(Unit->X,Unit->Y,Unit->Z);
-  MatrWorld = MatrMulMatr(M1,M2);
-  MatrView = MatrViewLookAt(VecSet(8,10,8),VecSet(0,0,0),VecSet(1,1,0));
-  MatrProj = MatrFrustrum(-1,-1,1,1,-1,100);
-  WVP = MatrMulMatr(MatrProj,MatrMulMatr(MatrWorld,MatrView)); 
+  Anim.camera.Mworld = MatrMulMatr(M1,M2);
+
+  Anim.camera.Mproj = MatrFrustrum(-1,-1,1,1,-1,100);
+  WVP = MatrMulMatr(Anim.camera.Mproj,MatrMulMatr(Anim.camera.Mworld,Anim.camera.Mview)); 
+  fullMatr = MatrMulMatr(Anim.camera.Mworld, Ani->camera.MVP);
 
 
   LoadCow();
@@ -176,40 +270,32 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
   }
 
 
-
+  
   j = glGetUniformLocation(CowProg, "DrawColor");
-  for (i = 0; i < NumOfVertexes; i++)
-  {
-    VEC v;
-    v = Vertexes[i];
-    v.X += Unit->X;
-    v.Y += Unit->Y;
-    v.Z += 10;
 
-    VertexesProj[i] = WorldToScreen(v); 
-  }
-
-  CowProg = ShadProgInit("a.vert", "a.frag");
   glUseProgram(CowProg);
-
-  for (i = 0; i < NumOfFacets; i++)
-  {
-    POINT p[3];
-
-    for (j = 0; j < 3; j++)
+  locMatr = glGetUniformLocation(CowProg, "Matr");
+    locTime = glGetUniformLocation(CowProg, "Time");
+    if (locMatr >= 0)
     {
-      p[j].x = VertexesProj[Facets[i][j]].x;         
-      p[j].y = VertexesProj[Facets[i][j]].y;
+      glUniformMatrix4fv(locMatr, 1, FALSE, &fullMatr.A[0][0]);
     }
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glColor3d(0.7, 0.5, 0.3);
-    glBegin(GL_TRIANGLES);
-      glVertex3f(p[0].x, p[0].y, 0);
-      glVertex3f(p[1].x, p[1].y, 0);
-      glVertex3f(p[2].x, p[2].y, 0);
+    if (locTime >= 0)
+    {
+      glUniform1f(locTime, (float)(Ani->timer.activeTime));
+    }
+
+   glBegin(GL_TRIANGLES);
+    for (i = 0; i < model->facetsNum; i++)
+    {
+      for (j = 0; j < 3; j++)
+      {
+        VEC v = vertexes[facets[i].vertexes[j]];
+        glVertex3f(v.X, v.Y, v.Z);
+      }
+    }
     glEnd();
-  } 
-  glUseProgram(0);
+    glUseProgram(0);
   
 
 

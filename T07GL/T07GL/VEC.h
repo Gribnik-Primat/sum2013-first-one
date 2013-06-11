@@ -11,15 +11,8 @@
 #define D2R(A) ((A) * (PI / 180.0))
 #define Degree2Radian(a) D2R(a)
 typedef double DBL;
-typedef struct tagVEC
-{
-  DBL X, Y, Z;
-} VEC;
 
-typedef struct tagMATR
-{
-  DBL A[4][4];
-} MATR;
+
 
 static VEC LOC,AT,UP;
 
@@ -348,67 +341,67 @@ __inline MATR MatrInverse( MATR M )
 }
 
 
-
-__inline MATR MatrViewLookAt(VEC Loc, VEC At, VEC Up)
+__inline void calculateRotLookAt(FLT * out, VEC Right, VEC Up, VEC Dir, VEC Loc)
 {
-  VEC 
-    Dir = VecSubVec(At, Loc),
-    Right = VecCrossVec(Dir, Up);
+  INT i;
+  FLT result[] = {
+    Right.X, Up.X, -Dir.X, 0,
+    Right.Y, Up.Y, -Dir.Y, 0,
+    Right.Z, Up.Z, -Dir.Z, 0,
+    0, 0, 0, 1
+  };
+  for (i = 0; i < 16; i++)
+    out[i] = result[i];
+}
+
+__inline void calculateFrustum(FLT l, FLT r, FLT b, FLT t, FLT n, FLT f, FLT * out)
+{
+  INT i;
+  FLT result[] = {
+    2 * n / (r - l), 0, 0, 0,
+    0, -2 * n / (t - b), 0, 0,
+    (r + l) / (r - l), (t+b)/(t-b), -(f+n)/(f-n), -1,
+    0, 0, -2*n*f/(f-n), 0
+  };
+  for (i = 0; i < 16; i++)
+    out[i] = result[i];
+}
+
+
+
+
+__inline MATR MatrSet( FLT * a )
+{
+  INT i, j;
   MATR m;
-
-
-  Dir = VecNormalize(Dir);
-  Right = VecNormalize(Right);
-  Up = VecCrossVec(Right, Dir);
-
-
-  m.A[0][0] = Right.X;
-  m.A[0][1] = Up.X;
-  m.A[0][2] = Dir.X;
-  m.A[0][3] = 0;
-  m.A[1][0] = Right.Y;
-  m.A[1][1] = Up.Y;
-  m.A[1][2] = Dir.Y;
-  m.A[1][3] = 0;
-  m.A[2][0] = Right.Z;
-  m.A[2][1] = Up.Z;
-  m.A[2][2] = Dir.Z;
-  m.A[2][3] = 0;
-  m.A[3][0] = VecDotVec(Loc, Right);
-  m.A[3][1] = VecDotVec(Loc, Up);
-  m.A[3][2] = -VecDotVec(Loc, Dir);
-  m.A[3][3] =  1;
-
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      m.A[i][j] = a[4 * i + j];
   return m;
 }
 
-__inline MATR MatrFrustrum(INT l,INT t,INT r,INT b,INT n,INT f)
+__inline MATR MatrFrustrum(FLT l, FLT r, FLT b, FLT t, FLT n, FLT f)
 {
-  MATR M = UnitMatrix;
-  M.A[0][0] = (2*n)/(r-l);
-  M.A[1][1] = (2*n)/(t-b);
-  M.A[2][0] = (r+l)/(r-l);
-  M.A[2][1] = (t+b)/(t-b);
-  M.A[2][2] = -(f+n)/(f-n);
-  M.A[2][3] = -1;
-  M.A[3][2] = (-2*n*f)/(f-n);
-
-  return M;
+  FLT arr[16];
+  calculateFrustum(l, r, b, t, n, f, arr);
+  return MatrSet(arr);
 }
 
-__inline MATR MatrOrto(INT l,INT t,INT r,INT b,INT n,INT f)
+__inline MATR MatrLookAt( VEC Loc, VEC At, VEC Up )
 {
-  MATR M = UnitMatrix;
-  M.A[0][0] = 2/(r-l);
-  M.A[1][1] = 2/(t-b);
-  M.A[2][2] = -2/(f-n);
-  M.A[3][1] = -(t+b)/(t-b);
-  M.A[3][2] = -(f+n)/(f-n);
-  M.A[3][0] = -(r+l)/(r-l);
-  M.A[3][3] = 1;
-
-  return M;
+  FLT rotArray[16];
+  VEC Dir = VecSubVec(At, Loc);
+  VEC Right = VecCrossVec(Dir, Up);
+  MATR rotateMatr, translateMatr;
+  Dir = VecNormalize(Dir);
+  Right = VecNormalize(Right);
+  Up = VecCrossVec(Right, Dir);
+  calculateRotLookAt(rotArray, Right, Up, Dir, Loc);
+  rotateMatr = MatrSet(rotArray);
+  translateMatr = MatrTranslate(-Loc.X, -Loc.Y, -Loc.Z);
+  return MatrMulMatr(translateMatr, rotateMatr);
 }
+
 
 
 #endif /* __VEC_H_ */

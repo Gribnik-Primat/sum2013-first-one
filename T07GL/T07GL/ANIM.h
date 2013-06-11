@@ -23,6 +23,28 @@ LONG FrameCounter;
 
 
 
+typedef struct CameraState
+{
+  /* Camera position */
+  VEC Pos;
+  /* Camera up */
+  VEC Up;
+  /* Camera looks at */
+  VEC At;
+  /* Perspctive view */
+  DBL PD;
+  /* Projection plane W and H */
+  DBL Wh;
+  DBL Hh;
+
+  MATR Mview;
+  MATR Mproj;
+  MATR Mworld;
+
+  MATR MVP;
+} CAMERASTATE;
+
+
 
 typedef struct tagvg4ANIM
 {
@@ -30,9 +52,6 @@ typedef struct tagvg4ANIM
   HDC hDC;        /* Контекст кадра в памяти */
   HGLRC hGLRC;
   HBITMAP hFrame; /* Битмап - буфер кадра */
-  MATR Mworld;
-  MATR Mview;
-  MATR Mproj;
   INT W, H,JPov,JCKID1;/* Размеры кадра анимации */
   DOUBLE Jx,Jz,Jy,Jr,Wp,Hp,PD;
   BYTE JButOld[32],JBut[32];
@@ -45,6 +64,9 @@ typedef struct tagvg4ANIM
   FPS;  /* количество кадров в секунду */
   BOOL
     IsPause;  /* Изображение кадра по точкам (DWORD на точку) */
+
+  CAMERASTATE camera;
+
 } vg4ANIM;
 
 
@@ -62,6 +84,9 @@ typedef VOID (*vg4UNIT_RESPONSE)( vg4UNIT *Unit, vg4ANIM *Ani );
 /* Функция отрисовки объекта */
 typedef VOID (*vg4UNIT_RENDER)( vg4UNIT *Unit, vg4ANIM *Ani );
 
+void setCamera(VEC pos, VEC lookAt, VEC up);
+
+VEC World2Screen(VEC point);
 
 /* Функции объектов */
 #define VG4_UNIT_BASE_FUNCS \
@@ -76,6 +101,8 @@ struct tagvg4UNIT
 {
   VG4_UNIT_BASE_FUNCS;
 };
+
+
 
 /* Функция инициализации анимации */
 BOOL AnimInit( HWND hWnd );
@@ -97,6 +124,7 @@ vg4UNIT * VG4_UnitCreate( INT Size );
 
 /* Функция добавления объекта анимации к системе */
 VOID AnimAdd( vg4UNIT *Unit );
+
 
 #endif /* __ANIM_H_ */
 

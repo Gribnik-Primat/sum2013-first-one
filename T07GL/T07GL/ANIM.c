@@ -71,6 +71,10 @@ BOOL AnimInit( HWND hWnd )
   TimePause = TimeShift = 0;
   FrameCounter = 0;
 
+  Anim.camera.Wh = 2;
+  Anim.camera.Hh = 2;
+  Anim.camera.PD = 1;
+  Anim.camera.projMatr = MatrFrustum(-Anim.camera.Wh/2, Anim.camera.Wh/2, -Anim.camera.Hh/2, Anim.camera.Hh/2, 1, 10000);
 
   VG4_IsInit = TRUE;
 
@@ -80,6 +84,22 @@ BOOL AnimInit( HWND hWnd )
 
   return TRUE;
 } /* End of 'AnimInit' function */
+
+void setCamera(VEC pos, VEC lookAt, VEC up)
+{
+  ANIM.camera.Pos = pos;
+  ANIM.camera.At = lookAt;
+  ANIM.camera.Up = up;
+  ANIM.camera.Mv atr = MatrLookAt(pos, lookAt, up);
+  ANIM.camera.MVP = MatrMulMatr(ANIM.camera.Mvatr, ANIM.camera.Mpatr);
+}
+
+VEC World2Screen(VEC point)
+{
+  /* -1 ~ 1 */
+  return VecMulMatr(point, AS2_ANIM.camera.MVP);
+}
+
 
 /* Функция деинициализации анимации.
 * АРГУМЕНТЫ: Нет.
@@ -281,38 +301,6 @@ VOID AnimAdd( vg4UNIT *Unit )
 } /* End of 'AnimAdd' function */
 
 
-POINT WorldToScreen( VEC P )
-{
-  VEC P1, P2, P3, P4;
-  POINT pt;
-  DBL Xs, Ys;
 
-  Anim.Mworld = MatrMulMatr(MatrScale(40, 40, 40), MatrTranslate(0, 0, -100)); 
-  Anim.Mview = MatrViewLookAt(VecSet(0, 0, -3), VecSet(Anim.Jx, Anim.Jy, Anim.Jr), VecSet(0, 1, 0)); 
-  Anim.Mproj = MatrProject(-1, 1, 1, -1, 1, 10);
-
-
-  Anim.Wp = 1.0;
-  Anim.Hp = 1.0;
-  Anim.PD = 1;
-
-  P1 = VecMulMatr(P, Anim.Mworld);
-  P2 = VecMulMatr(P1, Anim.Mview);
-  P3 = VecMulMatr(P2, Anim.Mproj);
-
-  P4.X = P2.X * Anim.PD/P2.Z;
-  P4.Y = P2.Y * Anim.PD/P2.Z;                                                             ///
-
-
-
-  P4.X *= 2/Anim.Wp;
-  P4.Y *= 2/Anim.Hp;
-
-  Xs = (P4.X + 1) * (Anim.Ws - 1);
-  Ys = (-P4.Y + 1) * (Anim.Hs - 1);
-  pt.x = Xs;
-  pt.y = Ys;
-  return pt;
-}
 
 /* END OF 'ANIM.C' FILE */
