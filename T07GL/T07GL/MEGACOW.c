@@ -215,7 +215,7 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
     CowProg = ShadProgInit("Z:\\sum2013\\T07anim\\a.vert", "Z:\\sum2013\\T07anim\\a.frag");
   }
 
-  setCamera(VecSet(-100, 600, -136), VecSet(unit->X, unit->Y, -136), VecSet(0, 0, 1));
+  setCamera(VecSet(-100, 600, -136), VecSet(Unit->X, Unit->Y, -136), VecSet(0, 0, 1));
 
   M1 = MatrScale(59,-59,59);
   M2 = MatrTranslate(Unit->X,Unit->Y,Unit->Z);
@@ -282,15 +282,15 @@ static VOID CowRender( COW *Unit, vg4ANIM *Ani )
     }
     if (locTime >= 0)
     {
-      glUniform1f(locTime, (float)(Ani->timer.activeTime));
+      glUniform1f(locTime, (float)(Ani->Time));
     }
 
    glBegin(GL_TRIANGLES);
-    for (i = 0; i < model->facetsNum; i++)
+    for (i = 0; i < NumOfFacets; i++)
     {
       for (j = 0; j < 3; j++)
       {
-        VEC v = vertexes[facets[i].vertexes[j]];
+        VEC v = Vertexes[i][j];
         glVertex3f(v.X, v.Y, v.Z);
       }
     }
