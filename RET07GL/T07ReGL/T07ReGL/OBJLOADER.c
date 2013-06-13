@@ -1,6 +1,6 @@
 /*
 * FILE NAME: objloader.c
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 06.06.2013
 * PURPOSE: .obj 3D models loader
 */

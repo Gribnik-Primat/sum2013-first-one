@@ -1,6 +1,6 @@
 /*
 * FILE NAME: units.h
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 06.06.2013
 * PURPOSE: Definitions of certain unit types constructors and methods
 */

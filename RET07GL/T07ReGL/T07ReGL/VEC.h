@@ -1,6 +1,6 @@
                /*
 * FILE NAME: vec.h
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 05.06.2013
 * PURPOSE: Vector & matrix library definitions
 */

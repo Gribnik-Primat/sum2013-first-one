@@ -1,6 +1,6 @@
 /*
 * FILE NAME: vec.c
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 06.06.2013
 * PURPOSE: Vector & Matrix library implementation
 */

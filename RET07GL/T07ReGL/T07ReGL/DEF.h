@@ -1,6 +1,6 @@
 /*
 * FILE NAME: DEF.H
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 06.06.2013
 * PURPOSE: Common definition declaration module.
 */

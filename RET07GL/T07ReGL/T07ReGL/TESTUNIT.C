@@ -67,8 +67,8 @@ static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
   Ani->camera.PD = 1.0;
 
   Ani->camera.MVP = M;
-  Ani->camera.viewMatr = MatrViewLookAt(VecSet(30, 30, 30), VecSet(0, 0, 0), VecSet(0, 1, 0));
-  Ani->camera.projMatr = MatrProjection(-Ani->camera.Wh / 2, Ani->camera.Wh / 2,-Ani->camera.Hh / 2, Ani->camera.Hh / 2,Ani->camera.PD, 1000);
+  Ani->camera.viewMatr = MatrLookAt(VecSet(30, 30, 30), VecSet(0, 0, 0), VecSet(0, 1, 0));
+  Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh / 2, Ani->camera.Wh / 2,-Ani->camera.Hh / 2, Ani->camera.Hh / 2,Ani->camera.PD, 1000);
 
 
   WVP = MatrMulMatr(MatrMulMatr(Ani->camera.MVP, Ani->camera.viewMatr), Ani->camera.projMatr);

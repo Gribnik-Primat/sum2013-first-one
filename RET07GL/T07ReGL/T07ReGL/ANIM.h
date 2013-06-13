@@ -1,6 +1,6 @@
                  /*
 * FILE NAME: anim.h
-* PROGRAMMER: AS2
+* PROGRAMMER: bg3
 * DATE: 06.06.2013
 * PURPOSE: Animation system headers
 */
