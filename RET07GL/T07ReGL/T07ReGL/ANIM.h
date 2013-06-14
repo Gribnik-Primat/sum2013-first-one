@@ -158,7 +158,7 @@ typedef struct tagbg3ANIM
 #endif
 
   /* Window size */
-  INT W, H;
+  INT W, H,cam,angle,AtX,AtY;
 
   /* Input state */
   KEYSSTATE keyState;
@@ -225,7 +225,7 @@ VOID BG3_SceneResponse( bg3ANIM * anim );
 /* Is pressed now? */
 BOOL BG3_KeyPressed( BYTE key );
 /* Is pressed now and not before */
-BOOL BG3_KeyNewPressed( BYTE key );
+
 /* Is pressed before? */
 BOOL BG3_KeyOldPressed( BYTE key );
 

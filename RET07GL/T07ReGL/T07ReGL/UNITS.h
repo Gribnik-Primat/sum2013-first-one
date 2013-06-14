@@ -16,6 +16,7 @@ typedef struct tagFacet
   INT vertexes[3];
 } FACET;
 
+
 typedef struct tagPolygonalModel
 {
   VEC * vertexes;
@@ -33,6 +34,8 @@ typedef struct tagUnitPosable
   BG3_UNIT_BASE_FUNCS;
   BG3_UNIT_POS_FIELDS;
 } bg3UNITPOS;
+
+
 
 /* megacube.c */
 bg3UNIT * CubeCreate( INT X, INT Y );

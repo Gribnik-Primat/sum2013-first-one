@@ -22,7 +22,7 @@ typedef struct
   BG3_UNIT_BASE_FUNCS;
   INT X, Y, Z;   /* Позиция объекта  */
   INT No;        /* Порядковый номер объекта */
-  bg3GOBJ G; /* Тестовый примитив */
+  bg3GOBJ G, LAND; /* Тестовый примитив */
 } TEST;
 
 static INT CurrentNo = 0; /* очередной порядковый номер */
@@ -48,9 +48,11 @@ FLT r1( VOID )
  *       bg3ANIM *Ani;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
+
+
 static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
 {
-  INT j;
+  INT j,i;
   FLT s;
   MATR M, WVP;
 
@@ -58,23 +60,47 @@ static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
   Ani->camera.Hh = 0.70;
   Ani->camera.PD = 1.0;
 
+  memcpy(Ani->keyState.old, Ani->keyState.actual, sizeof(Ani->keyState.actual));
+  memset(Ani->keyState.actual, 0, sizeof(Ani->keyState.actual));
+  GetKeyboardState(Ani->keyState.actual);
+  for (i = 0; i < 256; i++)
+    Ani->keyState.actual[i] >>= 7;
+  
   s = 8;
-  M = MatrMulMatr(MatrMulMatr(MatrMulMatr(MatrRotateX(-90), MatrRotateZ(-88 * Ani->timer.globalTime)), MatrScale(s, s, s)), MatrRotateY(Ani->timer.globalTime * 30));
+ 
+  if(Ani->keyState.actual['A'])
+    Ani->angle += 5;
+  if(Ani->keyState.actual['D'])
+    Ani->angle -= 5;
+  if(Ani->keyState.actual['W'])
+    Ani->cam += 2;
+  if(Ani->keyState.actual['S'])
+    Ani->cam -= 2;
+  if(Ani->keyState.actual['J'])
+    Ani->AtX += 15;
+  if(Ani->keyState.actual['L'])
+    Ani->AtX -= 15;
+  if(Ani->keyState.actual['I'])
+    Ani->AtY += 15;
+  if(Ani->keyState.actual['K'])
+    Ani->AtY -= 15;
   //M = MatrUnit();
+
+  M = MatrMulMatr (MatrScale(s, s, s),MatrRotate(Ani->angle,0,1,0));
 
   Ani->camera.Wh = 0.70 * Ani->W / Ani->H;
   Ani->camera.Hh = 0.70;
   Ani->camera.PD = 1.0;
 
   Ani->camera.MVP = M;
-  Ani->camera.viewMatr = MatrLookAt(VecSet(30, 30, 30), VecSet(0, 0, 0), VecSet(0, 1, 0));
-  Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh / 2, Ani->camera.Wh / 2,-Ani->camera.Hh / 2, Ani->camera.Hh / 2,Ani->camera.PD, 1000);
+  Ani->camera.viewMatr = MatrLookAt(VecSet(Ani->cam, Ani->cam, Ani->cam), VecSet(Ani->AtX, Ani->AtY, 0), VecSet(0, 1, 0));
+  Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh / 2, Ani->camera.Wh / 2,-Ani->camera.Hh / 2, Ani->camera.Hh / 2,Ani->camera.PD, 100000);
 
 
   WVP = MatrMulMatr(MatrMulMatr(Ani->camera.MVP, Ani->camera.viewMatr), Ani->camera.projMatr);
 
 
-  /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
+  /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */    
   glUseProgram(ShaderProg);
   glColor3d(0, 0, 0);
 
@@ -107,18 +133,8 @@ static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
 
   glColor3d(1, 1, 1);
   BG3_GeomDraw(&Unit->G);
+  BG3_GeomDraw(&Unit->LAND);
 
-  /* рисуем треугольники */
-  /*
-  glBegin(GL_TRIANGLES);
-    glColor3d(0, 0, 1);
-    glVertex3d(0, 0, 0);
-    glColor3d(0, 1, 0);
-    glVertex3d(0, 1, 0);
-    glColor3d(1, 0, 0);
-    glVertex3d(1, 0, 0);
-  glEnd();
-  /**/
   glUseProgram(0);
   glPopAttrib();
 } /* End of 'TestRender' function */
@@ -132,9 +148,14 @@ static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
 static VOID TestInit( TEST *Unit, bg3ANIM *Ani )
+
 {
   if (Unit->No == 1)
     ShaderProg = ShadProgInit("a.vert", "a.frag");
+  Ani->cam = 30;
+  Ani->angle = 0;
+  Ani->AtX = 0;
+  Ani->AtX = 0;
 } /* End of 'TestInit' function */
 
 /* Функция сроздания примерного объекта.
@@ -144,6 +165,8 @@ static VOID TestInit( TEST *Unit, bg3ANIM *Ani )
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (bg3UNIT *) указатель на созданный объект;
  */
+
+
 bg3UNIT * TestUnitCreate( DBL X, DBL Y, DBL Z )
 {
   TEST *Unit;
@@ -152,7 +175,7 @@ bg3UNIT * TestUnitCreate( DBL X, DBL Y, DBL Z )
   if ((Unit = (TEST *)BG3_UnitCreate(sizeof(TEST))) == NULL)
     return NULL;
 
-  Unit->Init = (bg3UNIT_RENDER)TestInit;
+  Unit->Init = (bg3UNIT_INIT)TestInit;
   Unit->Render = (bg3UNIT_RENDER)TestRender;
   Unit->X = X;
   Unit->Y = Y;
@@ -164,7 +187,9 @@ bg3UNIT * TestUnitCreate( DBL X, DBL Y, DBL Z )
   BG3_PrimDefaultColor = VecSet(0, 1, 0);
   BG3_PrimCreatePlane(&p, 300, 300, VecSet(-5, -1, 5), VecSet(10, 0, 0), VecSet(0, 0, -10));
   BG3_GeomAddPrim(&Unit->G, &p);
-  BG3_GeomLoad(&Unit->G, "cessna172.object");
+  BG3_GeomLoad(&Unit->G, "Mark 42.obj");
+  BG3_GeomLoad(&Unit->LAND, "Hoover_Dam.obj");
+  //BG3_GeomLoad(&Unit->LAND, "");
   return (bg3UNIT *)Unit;
 } /* End of 'TestUnitCreate' function */
 

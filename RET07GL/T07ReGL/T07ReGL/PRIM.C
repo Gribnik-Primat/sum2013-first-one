@@ -7,10 +7,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+  
 
 #include "anim.h"
 
 #define BG3_PI 3.14159265358979323846
+
 
 /* Глобальная переменная - цвет вершины по умолчанию */
 VEC BG3_PrimDefaultColor = {1, 1, 1};
@@ -142,7 +145,7 @@ VOID BG3_PrimDraw( bg3PRIM *Prim )
     /* данные с индексами */
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Prim->Buffs[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INT) * Prim->NumOfI,
-      Prim->I, GL_STATIC_DRAW);
+      Prim->I, GL_STATIC_DRAW);                                                                 
   }
 
   /* активировали буфера */

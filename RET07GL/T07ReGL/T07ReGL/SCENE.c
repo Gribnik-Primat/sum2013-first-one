@@ -6,21 +6,38 @@
 #include "keycodes.h"
 
 
+typedef struct tagbg3POLYUNIT
+{
+  /* Extend basic unit */
+  BG3_UNIT_BASE_FUNCS;
+  /* Is posable */
+  BG3_UNIT_POS_FIELDS;
+  /* Other transformations */
+  MATR transformMatrix;
+  /* 3D model */
+  POLYGONAL_MODEL * model;
+
+  /* Destination point */
+  int destX, destY;
+
+  /* Color */
+  float r, g, b;
+} POLYUNIT;
+
+static INT CowProg = -2;
+
+
 /* Function definitions */
 VOID SetCamera( bg3ANIM * Ani, VEC pos, VEC lookAt, VEC up );
-
-static MATR CowMatrix()
-{
-  return MatrMulMatr(MatrRotateX(90), MatrScale(15, 15, 15));
-}
-
 
 
 VOID BG3_SceneCreate(bg3ANIM * Ani)
 {
+  POLYUNIT *Unit;
   POLYGONAL_MODEL * models;
   MATR modelMatr;
-  
+
+  bg3GOBJ *Go = (VOID *)malloc(sizeof(bg3GOBJ));
   
   Ani->camera.Wh = 2;
   Ani->camera.Hh = 2;
@@ -28,25 +45,20 @@ VOID BG3_SceneCreate(bg3ANIM * Ani)
   Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh/2, Ani->camera.Wh/2,
                                          -Ani->camera.Hh/2, Ani->camera.Hh/2, 1, 10000);
   
-  models = loadObjModel("cow_new1.object");
-  modelMatr = CowMatrix();
-
-  
-   srand(30);
-   BG3_AnimAdd(CreateControlledUnit((bg3UNITPOS*)PolyUnitCreate(0, 0, 0,models, modelMatr), 1));
-
+     
+  BG3_AnimAdd(TestUnitCreate( 0,0,0 ));
 }
 
 VOID BG3_SceneResponse(bg3ANIM * ani)
 {
   bg3UNITPOS * unit = (bg3UNITPOS *)ani->units[0];
   DBL time = clock();
-  if (BG3_KeyNewPressed('P'))
+  if (ani->keyState.actual['P'])
   {
       ani->isPaused = !ani->isPaused;
   }
   
-  SetCamera(ani, VecSet(200, 200, 200), VecSet(0,0,0), VecSet(0, 0, 1));
+  SetCamera(ani, VecSet(300, 0, 300), VecSet(0,0,0), VecSet(0, 0, 1));
 }
 
 VOID SetCamera( bg3ANIM * Ani, VEC pos, VEC lookAt, VEC up )

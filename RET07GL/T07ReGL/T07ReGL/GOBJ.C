@@ -48,6 +48,7 @@ BOOL BG3_GeomAddPrim( bg3GOBJ *Go, bg3PRIM *Prim )
   /* копируем старые примитивы */
   memcpy(newblock, Go->Prims, sizeof(bg3PRIM) * Go->NumOfPrims);
 
+
   /* освобождаем старую память */
   free(Go->Prims);
   Go->Prims = newblock;
