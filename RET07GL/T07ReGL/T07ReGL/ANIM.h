@@ -72,7 +72,7 @@ typedef struct
  * примитивов и их материалов */
 typedef struct
 {
-  INT NumOfPrims, NumOfMats; /* размеры массивов */
+  INT NumOfPrims, NumOfMats,X,Y,Z; /* размеры массивов */
   bg3PRIM *Prims;            /* массив примитивов */
   bg3MATERIAL *Mats;         /* массив материалов */
 } bg3GOBJ;
@@ -158,7 +158,7 @@ typedef struct tagbg3ANIM
 #endif
 
   /* Window size */
-  INT W, H,cam,angle,AtX,AtY;
+  INT W, H,cam,angle,AtX,AtY,x,y,z,s;
 
   /* Input state */
   KEYSSTATE keyState;
@@ -176,6 +176,7 @@ typedef struct tagbg3ANIM
   
   /* Units list */
   bg3UNIT * units[1000];
+
   INT unitsNum;
 } bg3ANIM;
 
@@ -253,6 +254,8 @@ BOOL BG3_PrimCreatePlane( bg3PRIM *Prim, INT W, INT H,
 BOOL BG3_PrimCreateSphere( bg3PRIM *Prim, INT W, INT H,
                            VEC Loc, FLT Radius );
 
+BOOL BG3_PrimCreateHeightField(bg3PRIM *Prim,CHAR *FileName,VEC Loc, VEC Du, VEC Dv );
+
 /* Функция загрузки геометрического объекта */
 BOOL BG3_GeomLoad( bg3GOBJ *Go, CHAR *FileName );
 
@@ -267,5 +270,11 @@ BOOL BG3_GeomAddMat( bg3GOBJ *Go, bg3MATERIAL *Mat );
 
 /* Функция рисования геометрического объекта */
 VOID BG3_GeomDraw( bg3GOBJ *Go );
+
+BOOL BG3_GeomAddMat( bg3GOBJ *Go, bg3MATERIAL *Mat );
+
+VOID LoadMaterials( bg3GOBJ *Go, CHAR *FileName );
+
+
 
 #endif

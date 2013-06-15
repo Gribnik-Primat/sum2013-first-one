@@ -102,7 +102,6 @@ VOID BG3_GeomDraw( bg3GOBJ *Go )
     if (Go->Prims[i].Mat != -1)
     {
       INT n = Go->Prims[i].Mat;
-
       if (Go->Mats[n].TexNo == -1)
       {
         /* текстуры нет */

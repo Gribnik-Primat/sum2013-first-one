@@ -22,7 +22,7 @@ typedef struct
   BG3_UNIT_BASE_FUNCS;
   INT X, Y, Z;   /* Позиция объекта  */
   INT No;        /* Порядковый номер объекта */
-  bg3GOBJ G, LAND; /* Тестовый примитив */
+  bg3GOBJ G,LAND; /* Тестовый примитив */
 } TEST;
 
 static INT CurrentNo = 0; /* очередной порядковый номер */
@@ -48,52 +48,33 @@ FLT r1( VOID )
  *       bg3ANIM *Ani;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
+static bg3PRIM p;
 
+static INT x=0,y=0,z=0;
 
 static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
 {
   INT j,i;
   FLT s;
   MATR M, WVP;
+  VEC dvec = VecSet(0, 0, 0);
 
   Ani->camera.Wh = 0.70 * Ani->W / Ani->H;
   Ani->camera.Hh = 0.70;
   Ani->camera.PD = 1.0;
 
-  memcpy(Ani->keyState.old, Ani->keyState.actual, sizeof(Ani->keyState.actual));
-  memset(Ani->keyState.actual, 0, sizeof(Ani->keyState.actual));
-  GetKeyboardState(Ani->keyState.actual);
-  for (i = 0; i < 256; i++)
-    Ani->keyState.actual[i] >>= 7;
-  
-  s = 8;
- 
-  if(Ani->keyState.actual['A'])
-    Ani->angle += 5;
-  if(Ani->keyState.actual['D'])
-    Ani->angle -= 5;
-  if(Ani->keyState.actual['W'])
-    Ani->cam += 2;
-  if(Ani->keyState.actual['S'])
-    Ani->cam -= 2;
-  if(Ani->keyState.actual['J'])
-    Ani->AtX += 15;
-  if(Ani->keyState.actual['L'])
-    Ani->AtX -= 15;
-  if(Ani->keyState.actual['I'])
-    Ani->AtY += 15;
-  if(Ani->keyState.actual['K'])
-    Ani->AtY -= 15;
-  //M = MatrUnit();
 
-  M = MatrMulMatr (MatrScale(s, s, s),MatrRotate(Ani->angle,0,1,0));
+  
+
+
+  M = MatrMulMatr (MatrMulMatr(MatrScale(Ani->cam, Ani->cam, Ani->cam),MatrTranslate(Ani->AtX,Ani->AtY,0)),MatrRotate(Ani->angle,0,1,0));
 
   Ani->camera.Wh = 0.70 * Ani->W / Ani->H;
   Ani->camera.Hh = 0.70;
   Ani->camera.PD = 1.0;
 
   Ani->camera.MVP = M;
-  Ani->camera.viewMatr = MatrLookAt(VecSet(Ani->cam, Ani->cam, Ani->cam), VecSet(Ani->AtX, Ani->AtY, 0), VecSet(0, 1, 0));
+  Ani->camera.viewMatr = MatrLookAt(VecSet(Unit->G.X+30,Unit->G.Y+30,Unit->G.Z+30), VecSet(Unit->G.X,Unit->G.Y,Unit->G.Z), VecSet(0, 1, 0));
   Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh / 2, Ani->camera.Wh / 2,-Ani->camera.Hh / 2, Ani->camera.Hh / 2,Ani->camera.PD, 100000);
 
 
@@ -132,8 +113,10 @@ static VOID TestRender( TEST *Unit, bg3ANIM *Ani )
   glPushAttrib(GL_ALL_ATTRIB_BITS);
 
   glColor3d(1, 1, 1);
+
   BG3_GeomDraw(&Unit->G);
   BG3_GeomDraw(&Unit->LAND);
+
 
   glUseProgram(0);
   glPopAttrib();
@@ -156,6 +139,11 @@ static VOID TestInit( TEST *Unit, bg3ANIM *Ani )
   Ani->angle = 0;
   Ani->AtX = 0;
   Ani->AtX = 0;
+  Ani->s = 8;
+  Ani->x = 0;
+  Ani->y = 0;
+  Ani->z = 0;
+
 } /* End of 'TestInit' function */
 
 /* Функция сроздания примерного объекта.
@@ -166,30 +154,70 @@ static VOID TestInit( TEST *Unit, bg3ANIM *Ani )
  *   (bg3UNIT *) указатель на созданный объект;
  */
 
+VOID TestUnitResponse( TEST *Unit, bg3ANIM *Ani )
+{   
+  if(Ani->keyState.actual['A'])
+    Unit->G.X -= 5;
+  if(Ani->keyState.actual['D'])
+    Unit->G.X += 5;
+  if(Ani->keyState.actual['W'])
+    Unit->G.Z -= 5;
+  if(Ani->keyState.actual['S'])
+    Unit->G.Z += 5;
+  if(Ani->keyState.actual['E'])
+    Unit->G.Y += 5;
+  if(Ani->keyState.actual['Q'])
+    Unit->G.Y -= 5;
 
-bg3UNIT * TestUnitCreate( DBL X, DBL Y, DBL Z )
+
+
+  if(Ani->keyState.actual['L'])
+    Ani->angle += 1;
+  if(Ani->keyState.actual['J'])
+    Ani->angle -= 1;
+  if(Ani->keyState.actual['I'])
+    Ani->cam += 2;
+  if(Ani->keyState.actual['K'])
+    Ani->cam -= 2;
+
+
+}
+
+
+bg3UNIT * TestUnitCreate( DBL X, DBL Y, DBL Z)
 {
+
   TEST *Unit;
-  bg3PRIM p;
+  bg3MATERIAL DefMat;
+
+
+  DefMat.Ka = VecSet(0.1, 0.1, 0.1);
+  DefMat.Kd = VecSet(0.9, 0.9, 0.9);
+  DefMat.Ks = VecSet(0.0, 0.0, 0.0);
+  DefMat.Phong = 30;
+  DefMat.Trans = 0;
+  strcpy(DefMat.MapD, "cDepth1000_pdrv.bmp");
+  strcpy(DefMat.Name, "unknown");
 
   if ((Unit = (TEST *)BG3_UnitCreate(sizeof(TEST))) == NULL)
     return NULL;
 
   Unit->Init = (bg3UNIT_INIT)TestInit;
   Unit->Render = (bg3UNIT_RENDER)TestRender;
-  Unit->X = X;
-  Unit->Y = Y;
-  Unit->Z = Z;
+  Unit->Response = (bg3UNIT_RESPONSE)TestUnitResponse;
+  Unit->G.X = X;
+  Unit->G.Y = Y;
+  Unit->G.Z = Z;
   Unit->No = ++CurrentNo;
-  BG3_PrimDefaultColor = VecSet(1, 0, 0);
-  BG3_PrimCreateSphere(&p, 300, 300, VecSet(0, 0, 0), 1);
-  BG3_GeomAddPrim(&Unit->G, &p);
+
+  
+  
   BG3_PrimDefaultColor = VecSet(0, 1, 0);
-  BG3_PrimCreatePlane(&p, 300, 300, VecSet(-5, -1, 5), VecSet(10, 0, 0), VecSet(0, 0, -10));
-  BG3_GeomAddPrim(&Unit->G, &p);
+  ///BG3_PrimCreatePlane(&p, 300, 300, VecSet(-5, -1, 5), VecSet(10, 0, 0), VecSet(0, 0, -10));
+  BG3_PrimCreateHeightField( &p, "cDepth1000_pdrv.bmp", VecSet(-5, -1, 5), VecSet(1000, 0, 0), VecSet(0, 0, -1000));
+  BG3_GeomAddPrim(&Unit->LAND,&p);
+  BG3_GeomAddMat(&Unit->LAND,&DefMat);
   BG3_GeomLoad(&Unit->G, "Mark 42.obj");
-  BG3_GeomLoad(&Unit->LAND, "Hoover_Dam.obj");
-  //BG3_GeomLoad(&Unit->LAND, "");
   return (bg3UNIT *)Unit;
 } /* End of 'TestUnitCreate' function */
 

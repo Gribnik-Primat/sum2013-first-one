@@ -1,29 +1,24 @@
 /* FILE NAME: PRIM.C
- * PROGRAMMER: bg3
- * DATE: 11.06.2013
+ * PROGRAMMER: VG4
+ * DATE: 14.06.2013
  * PURPOSE: Geometry object handle.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-  
 
 #include "anim.h"
 
-#define BG3_PI 3.14159265358979323846
-
-
 /* Глобальная переменная - цвет вершины по умолчанию */
-VEC BG3_PrimDefaultColor = {1, 1, 1};
+VEC VG4_PrimDefaultColor = {1, 1, 1};
 
 /* Функция создания примитива.
  * АРГУМЕНТЫ:
  *   - указатель на создаваемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  *   - тип примитива:
- *       bg3PRIM_TYPE Type;
+ *       vg4PRIM_TYPE Type;
  *   - количества вершин и индексов:
  *       INT NumOfV, NumOfI;
  *   - указатели на вершины (может быть NULL):
@@ -33,14 +28,14 @@ VEC BG3_PrimDefaultColor = {1, 1, 1};
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (BOOL) TRUE при успехе, FALSE при нехватке памати.
  */
-BOOL BG3_PrimCreate( bg3PRIM *Prim, bg3PRIM_TYPE Type,
+BOOL VG4_PrimCreate( vg4PRIM *Prim, vg4PRIM_TYPE Type,
                      INT NumOfV, INT NumOfI,
                      VERTEX *Vert, INT *Ind )
 {
   INT nv, ni, size, i, j, k;
 
-  memset(Prim, 0, sizeof(bg3PRIM));
-  if (Type == BG3_PRIM_GRID)
+  memset(Prim, 0, sizeof(vg4PRIM));
+  if (Type == VG4_PRIM_GRID)
     nv = NumOfV * NumOfI, ni = NumOfV * (NumOfI - 1) * 2;
   else
     nv = NumOfV, ni = NumOfI;
@@ -55,16 +50,17 @@ BOOL BG3_PrimCreate( bg3PRIM *Prim, bg3PRIM_TYPE Type,
   Prim->NumOfV = nv;
   Prim->NumOfI = ni;
   Prim->Size = size;
+  Prim->Mat = -1;
   if (Vert == NULL)
     for (i = 0; i < nv; i++)
-      Prim->V[i].C = BG3_PrimDefaultColor;
+      Prim->V[i].C = VG4_PrimDefaultColor;
   else
     /* копируем вершины */
     memcpy(Prim->V, Vert, sizeof(VERTEX) * nv);
   if (Ind != NULL)
     /* копируем индексы */
     memcpy(Prim->I, Ind, sizeof(INT) * ni);
-  if (Type == BG3_PRIM_GRID)
+  if (Type == VG4_PRIM_GRID)
   {
     /* строим индексы для сетки */
     Prim->GW = NumOfV;
@@ -79,37 +75,37 @@ BOOL BG3_PrimCreate( bg3PRIM *Prim, bg3PRIM_TYPE Type,
       }
   }
   return TRUE;
-} /* End of 'BG3_PrimCreate' function */
+} /* End of 'VG4_PrimCreate' function */
 
 /* Функция удаления примитива.
  * АРГУМЕНТЫ:
  *   - указатель на удаляемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
-VOID BG3_PrimClose( bg3PRIM *Prim )
+VOID VG4_PrimClose( vg4PRIM *Prim )
 {
   if (Prim->V != NULL)
     free(Prim->V);
   glDeleteBuffers(2, Prim->Buffs);
   glDeleteVertexArrays(1, &Prim->VertBuf);
-  memset(Prim, 0, sizeof(bg3PRIM));
-} /* End of 'BG3_PrimClose' function */
+  memset(Prim, 0, sizeof(vg4PRIM));
+} /* End of 'VG4_PrimClose' function */
 
 /* Функция копирования примитива.
  * АРГУМЕНТЫ:
  *   - указатель на создаваемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  *   - указатель на копируемый примитив:
- *       bg3PRIM *PrimSrc;
+ *       vg4PRIM *PrimSrc;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (BOOL) TRUE при успехе, FALSE при нехватке памати.
  */
-BOOL BG3_PrimDup( bg3PRIM *Prim, bg3PRIM *PrimSrc )
+BOOL VG4_PrimDup( vg4PRIM *Prim, vg4PRIM *PrimSrc )
 {
   VERTEX *v;
 
-  memset(Prim, 0, sizeof(bg3PRIM));
+  memset(Prim, 0, sizeof(vg4PRIM));
   if ((v = malloc(PrimSrc->Size)) == NULL)
     return FALSE;
 
@@ -118,15 +114,16 @@ BOOL BG3_PrimDup( bg3PRIM *Prim, bg3PRIM *PrimSrc )
   Prim->V = v;
   Prim->I = (INT *)(Prim->V + PrimSrc->NumOfV);
   Prim->Buffs[0] = Prim->Buffs[1] = Prim->VertBuf = 0;
+  Prim->Mat = -1;
   return TRUE;
-} /* End of 'BG3_PrimDup' function */
+} /* End of 'VG4_PrimDup' function */
 
 /* Функция рисования примитива.
  *   - указатель на создаваемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
  */
-VOID BG3_PrimDraw( bg3PRIM *Prim )
+VOID VG4_PrimDraw( vg4PRIM *Prim )
 {
   INT i;
 
@@ -145,7 +142,7 @@ VOID BG3_PrimDraw( bg3PRIM *Prim )
     /* данные с индексами */
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Prim->Buffs[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INT) * Prim->NumOfI,
-      Prim->I, GL_STATIC_DRAW);                                                                 
+      Prim->I, GL_STATIC_DRAW);
   }
 
   /* активировали буфера */
@@ -166,7 +163,7 @@ VOID BG3_PrimDraw( bg3PRIM *Prim )
   glVertexAttribPointer(3, 3, GL_FLOAT, FALSE, sizeof(VERTEX), (VOID *)(sizeof(VEC) * 2 + sizeof(UV)));
   glEnableVertexAttribArray(3);
 
-  if (Prim->Type == BG3_PRIM_GRID)
+  if (Prim->Type == VG4_PRIM_GRID)
   {
     for (i = 0; i < Prim->GH - 1; i++)
     {
@@ -201,12 +198,12 @@ VOID BG3_PrimDraw( bg3PRIM *Prim )
   }
   glEnd();
   /**/
-} /* End of 'BG3_PrimDraw' function */
+} /* End of 'VG4_PrimDraw' function */
 
 /* Функция создания примитива плоскость.
  * АРГУМЕНТЫ:
  *   - указатель на создаваемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  *   - размер сетки:
  *       INT W, H;
  *   - вектор начала и касательные вектора:
@@ -214,13 +211,13 @@ VOID BG3_PrimDraw( bg3PRIM *Prim )
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (BOOL) TRUE при успехе, FALSE при нехватке памати.
  */
-BOOL BG3_PrimCreatePlane( bg3PRIM *Prim, INT W, INT H,
+BOOL VG4_PrimCreatePlane( vg4PRIM *Prim, INT W, INT H,
                           VEC Loc, VEC Du, VEC Dv )
 {
   INT i, j, k = 0;
   VEC norm = VecCrossVec(Du, Dv);
 
-  if (!BG3_PrimCreate(Prim, BG3_PRIM_GRID, W, H, NULL, NULL))
+  if (!VG4_PrimCreate(Prim, VG4_PRIM_GRID, W, H, NULL, NULL))
     return FALSE;
 
   /* Строим вершины плоскости сферы */
@@ -240,12 +237,12 @@ BOOL BG3_PrimCreatePlane( bg3PRIM *Prim, INT W, INT H,
   }
 
   return TRUE;
-} /* End of 'BG3_PrimCreatePlane' function */
+} /* End of 'VG4_PrimCreatePlane' function */
 
 /* Функция создания примитива плоскость.
  * АРГУМЕНТЫ:
  *   - указатель на создаваемый примитив:
- *       bg3PRIM *Prim;
+ *       vg4PRIM *Prim;
  *   - размер сетки:
  *       INT W, H;
  *   - вектор центра:
@@ -255,12 +252,12 @@ BOOL BG3_PrimCreatePlane( bg3PRIM *Prim, INT W, INT H,
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (BOOL) TRUE при успехе, FALSE при нехватке памати.
  */
-BOOL BG3_PrimCreateSphere( bg3PRIM *Prim, INT W, INT H,
+BOOL VG4_PrimCreateSphere( vg4PRIM *Prim, INT W, INT H,
                            VEC Loc, FLT Radius )
 {
   INT i, j, k = 0;
 
-  if (!BG3_PrimCreate(Prim, BG3_PRIM_GRID, W, H, NULL, NULL))
+  if (!VG4_PrimCreate(Prim, VG4_PRIM_GRID, W, H, NULL, NULL))
     return FALSE;
 
   /* Строим вершины плоскости сферы */
@@ -268,12 +265,12 @@ BOOL BG3_PrimCreateSphere( bg3PRIM *Prim, INT W, INT H,
   {
     FLT
       v = (FLT)i / (H - 1),
-      theta = v * BG3_PI;
+      theta = v * VG4_PI;
     for (j = 0; j < W; j++)
     {
       FLT
         u = (FLT)j / (W - 1),
-        phi = u * 2 * BG3_PI,
+        phi = u * 2 * VG4_PI,
         x = sin(theta) * sin(phi),
         y = cos(theta),
         z = sin(theta) * cos(phi);
@@ -285,9 +282,21 @@ BOOL BG3_PrimCreateSphere( bg3PRIM *Prim, INT W, INT H,
     }
   }
   return TRUE;
-} /* End of 'BG3_PrimCreateSphere' function */
+} /* End of 'VG4_PrimCreateSphere' function */
 
-BOOL BG3_PrimCreateHeightField(bg3PRIM* Prim,CHAR* FileName,VEC Loc, VEC Du, VEC Dv )
+/* Функция создания примитива рельеф.
+ * АРГУМЕНТЫ:
+ *   - указатель на создаваемый примитив:
+ *       vg4PRIM *Prim;
+ *   - имя файла с высота:
+ *       CHAR *FileName;
+ *   - вектор начала и касательные вектора:
+ *       VEC Loc, Du, Dv;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (BOOL) TRUE при успехе, FALSE при нехватке памати.
+ */
+BOOL VG4_PrimCreateHeightField( vg4PRIM *Prim, CHAR *FileName,
+                                VEC Loc, VEC Du, VEC Dv )
 {
   HBITMAP hBm, hBmDib;
   BITMAP Bm;
@@ -295,7 +304,7 @@ BOOL BG3_PrimCreateHeightField(bg3PRIM* Prim,CHAR* FileName,VEC Loc, VEC Du, VEC
   BITMAPINFOHEADER bih;
   DWORD *Bits;
 
-  memset(Prim, 0, sizeof(bg3PRIM));
+  memset(Prim, 0, sizeof(vg4PRIM));
 
   if ((hBm = LoadImage(NULL, FileName,
          IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE)) != NULL)
@@ -329,7 +338,7 @@ BOOL BG3_PrimCreateHeightField(bg3PRIM* Prim,CHAR* FileName,VEC Loc, VEC Du, VEC
         hMemDC, 0, 0, SRCCOPY);
 
       /* создаем плоскость */
-      if (BG3_PrimCreatePlane(Prim, Bm.bmWidth, Bm.bmHeight, Loc, Du, Dv))
+      if (VG4_PrimCreatePlane(Prim, Bm.bmWidth, Bm.bmHeight, Loc, Du, Dv))
       {
         INT i, j;
 
@@ -360,7 +369,7 @@ BOOL BG3_PrimCreateHeightField(bg3PRIM* Prim,CHAR* FileName,VEC Loc, VEC Du, VEC
   if (Prim->V == NULL)
     return FALSE;
   return TRUE;
-} /* End of 'BG3_PrimCreateHeightField' function */
+} /* End of 'VG4_PrimCreateHeightField' function */
 
 /* END OF 'PRIM.C' FILE */
 

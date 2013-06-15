@@ -1,6 +1,6 @@
 /* FILE NAME   : a.frag
  * PURPOSE     : Simple fragment shader.
- * PROGRAMMER  : VG4.
+ * PROGRAMMER  : bg3.
  * LAST UPDATE : 10.06.2013
  */
 

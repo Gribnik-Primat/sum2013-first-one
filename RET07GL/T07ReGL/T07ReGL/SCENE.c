@@ -36,6 +36,7 @@ VOID BG3_SceneCreate(bg3ANIM * Ani)
   POLYUNIT *Unit;
   POLYGONAL_MODEL * models;
   MATR modelMatr;
+  INT X=0,Y=0,Z=0;
 
   bg3GOBJ *Go = (VOID *)malloc(sizeof(bg3GOBJ));
   
@@ -45,20 +46,19 @@ VOID BG3_SceneCreate(bg3ANIM * Ani)
   Ani->camera.projMatr = MatrFrustum(-Ani->camera.Wh/2, Ani->camera.Wh/2,
                                          -Ani->camera.Hh/2, Ani->camera.Hh/2, 1, 10000);
   
+  
+
      
-  BG3_AnimAdd(TestUnitCreate( 0,0,0 ));
+  BG3_AnimAdd(TestUnitCreate( X,Y,Z));
 }
 
 VOID BG3_SceneResponse(bg3ANIM * ani)
 {
   bg3UNITPOS * unit = (bg3UNITPOS *)ani->units[0];
   DBL time = clock();
-  if (ani->keyState.actual['P'])
-  {
+  if(ani->keyState.actual['P'])
       ani->isPaused = !ani->isPaused;
-  }
   
-  SetCamera(ani, VecSet(300, 0, 300), VecSet(0,0,0), VecSet(0, 0, 1));
 }
 
 VOID SetCamera( bg3ANIM * Ani, VEC pos, VEC lookAt, VEC up )

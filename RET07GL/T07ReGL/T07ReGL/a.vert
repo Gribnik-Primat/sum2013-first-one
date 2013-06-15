@@ -1,6 +1,6 @@
 /* FILE NAME   : a.vert
  * PURPOSE     : Simple vertex shader.
- * PROGRAMMER  : VG4.
+ * PROGRAMMER  : bg3.
  * LAST UPDATE : 10.06.2013
  */
 

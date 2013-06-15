@@ -78,7 +78,7 @@ VOID ControlledUnitResponse( bg3UNIT * u, bg3ANIM *Ani )
     {
     case 0:
       // WASD
-if (BG3_KeyPressed('W'))
+    if (BG3_KeyPressed('W'))
         dvec.Y = -Ani->timer.deltaActiveTime * 300, Unit->RotZ = -90;
       else if (BG3_KeyPressed('S'))
         dvec.Y = Ani->timer.deltaActiveTime * 300, Unit->RotZ = 90;
